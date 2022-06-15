@@ -44,18 +44,36 @@ device2 = mididevice('Teensy MIDI');
 
 %% Initialize Data Tables
 % wanted parameters
-parameters = {'block', 'block_start_time'};
-var_types = {'double', 'double'};
+parameters = {'block_num', 'start_time', 'play_duration', 'ear', 'hand'};
+var_types = {'double', 'double', 'double', 'string', 'string'};
 % create tables
-[run_info_table, test_filename] = createTable(2, test_len, parameters, ...
-                                              var_types, subject_number, 'run_info', group);
+[run_info_table, info_table_filename] = createTable(2, test_len, parameters, var_types, subject_number, 'run_info', group);
 
-% %% Familiarity Phase
+
+% create an assignment of conditions per block
+index_to_letter = ['R', 'L'];
+ears = [1, 2];
+hands = [1, 2];
+[X, Y] = meshgrid(ears, hands);
+prod = [X(:), Y(:)];
+assert(mod(num_blocks, length(prod)) == 0);
+conditions = repmat(prod, num_blocks/length(prod), 1);
+conditions = conditions(randperm(length(conditions)), :);
+
+
 % initialize screen
- HideCursor;
+ % HideCursor
  [window, rect] = Screen('openwindow',0,[0, 0, 0], [0 0 640 480]);
  win_hight = rect(4) - rect(2);
  win_width = rect(3) - rect(1); 
+
+%% Phase 1: teaching subjects to play (without auditory feedback for now)
+
+%% TODO: Phase 2a: add a silent scan (motor only), instructions and blocks
+%% TODO: Phase 2b: add a passive listening (auditory only), instructions and blocks
+
+
+%% Phase 3: playing with sound - the familiarity phase
 % instruction slide
      Screen('FillRect', window, [172, 172, 172])
      Screen('Flip', window);
@@ -74,7 +92,8 @@ var_types = {'double', 'double'};
 
 
 
-%% The experiment itslef
+%% Phase 4: The experiment - a single run for now. TODO: decide how to program 3 runs.
+
 % instruction slide + 20 blocks
 % black screen during training and white screen during rest
 
@@ -90,16 +109,17 @@ Screen('Flip', window);
 KbWait;
 WaitSecs(0.5);
 
-
 % start the loop for this run
 for i_block = 1 : num_blocks
+    % TODO: display instructions on which hand to play with, and which ear to expect feedback to.
     disp(i_block)
-    train_table = playMIDI_t(group, device, train_len, window, train_table, i_block);
-    train_table = restTrain_v2(rest_len, window, device, train_len, ...
-    train_table, num_blocks, i_block, win_hight, win_width);
+    run_info_table = playMIDI_t(group, device, train_len, window, run_info_table, i_block);
+    run_info_table = restTrain_v2(rest_len, window, device, train_len, ...
+    run_info_table, num_blocks, i_block, win_hight, win_width);
 end
 
-%% Post-Test Phase
+%% Phase 5a: Motor Localizer (playing with no sound). TODO: decide if we want to extend this and use it to compare with the silent playing from before the experiment.
+%TODO: complete.
 
 % display post test instructions
 Screen('FillRect', window, [172, 172, 172])
@@ -114,62 +134,19 @@ Screen('Flip', window);
 KbWait;
 WaitSecs(0.5);
 
-% display headphones and play sequence
-Screen('FillRect', window, [255, 255, 255])
-Screen('Flip', window);
-instruct5 = imread('headphones.jpg');
-TexturePointer = Screen('MakeTexture',window, instruct5);
-clear instruct5;
-Screen('DrawTexture',window, TexturePointer);
-Screen('Flip', window);
-pause(1);
-load(fullfile(pwd, 'seq_mat'));
-playSequence(seq_mat, IPI);
-WaitSecs(0.5);
 
-% first hand test
-[post_test_table] = playMIDI(device, test_len, window, post_test_table, 1);
-restTest(rest_len, window);
-[post_test_table] = playMIDI(device, test_len, window, post_test_table, 2);
+%% Phase 5b: Auditory Localizer (passive listening). TODO: decide if we want to extend this and use it to compare with the silent playing from before the experiment.
+%TODO: complete.
 
-% switch hands
+% display post test instructions
 Screen('FillRect', window, [172, 172, 172])
 Screen('Flip', window);
-instruct2 = imread('instruction_post_RH.jpg');
+instruct2 = imread('instruction_post_LH.jpg');
 TexturePointer = Screen('MakeTexture',window, instruct2);
 clear instruct2;
 Screen('DrawTexture',window, TexturePointer);
 Screen('Flip', window);
-% wait for a key press in order to continue
-KbWait;
-WaitSecs(0.5);
 
-% display headphones and play sequence
-Screen('FillRect', window, [255, 255, 255])
-Screen('Flip', window);
-instruct5 = imread('headphones.jpg');
-TexturePointer = Screen('MakeTexture',window, instruct5);
-clear instruct5;
-Screen('DrawTexture',window, TexturePointer);
-Screen('Flip', window);
-pause(2);
-load(fullfile(pwd, 'seq_mat'));
-playSequence(seq_mat, IPI);
-WaitSecs(0.5);
-
-% second hand test
-[post_test_table] = playMIDI(device, test_len, window, post_test_table, 3);
-restTest(rest_len, window);
-[post_test_table] = playMIDI(device, test_len, window, post_test_table, 4);
-
-% close psychtoolbox window
-Screen('FillRect', window, [172, 172, 172])
-Screen('Flip', window);
-instruct6 = imread('finish.jpg');
-TexturePointer = Screen('MakeTexture',window, instruct6);
-clear instruct6;
-Screen('DrawTexture',window, TexturePointer);
-Screen('Flip', window);
 % wait for a key press in order to continue
 KbWait;
 WaitSecs(0.5);
@@ -177,6 +154,4 @@ sca;
 
 %% Export Tables to Excel and Disconnect MIDI
 xl_path = fullfile(pwd, 'midi_data', 'LH');
-writetable(run_info_table, fullfile(xl_path, test_filename));
-writetable(train_table, fullfile(xl_path, train_filename));
-writetable(post_test_table, fullfile(xl_path, post_test_filename));
+writetable(run_info_table, fullfile(xl_path, info_table_filename));

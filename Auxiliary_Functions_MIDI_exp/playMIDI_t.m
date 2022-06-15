@@ -58,6 +58,13 @@ function [data_table] = playMIDI_t(group, midi_dev, train_len, window, data_tabl
                         timestamp_vec(note_ctr * 2) = msg.Timestamp;
                     end
                     if msg.Note ~= 0
+                        if note_ctr == 1
+                            time_of_first_note = toc(get_global_tic);
+                        end
+                        if note_ctr == train_len
+                            time_of_last_note = toc(get_global_tic);
+                            duration_of_playing = time_of_last_note - time_of_first_note;
+                        end
                         note_ctr = note_ctr + 1;
                     end
                 end
@@ -79,7 +86,9 @@ function [data_table] = playMIDI_t(group, midi_dev, train_len, window, data_tabl
      
    % update table from vectors between blocks
     if istable(data_table)
-         [data_table] = updateTable(data_table, i_block, notes_vec, timestamp_vec, train_len);
+        data_table.block_num(i_block) = i_block;
+        data_table.start_time(i_block) = time_of_first_note;
+        data_table.play_duration(i_block) = time_of_first_note;
      end
     
     % release objects
