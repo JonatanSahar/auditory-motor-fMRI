@@ -1,15 +1,17 @@
 % update data table with block number, notes pressed and timestamps
-function data_table = updateTable(data_table, i_block, notes_vec, timestamp_vec, train_len)
-train_len=train_len*2;
-for i_note = 1 : train_len
-    curr_row = train_len * (i_block - 1) + i_note;
-    data_table.block(curr_row) = i_block;
-    data_table.time_stamp(curr_row) = timestamp_vec(i_note);
-    data_table.note(curr_row) = notes_vec(i_note);
-    if mod(i_note, 2)
-        data_table.velocity(curr_row) = 127;
-    else
-        data_table.velocity(curr_row) = 0;
+function data_table = updateTable(data_table, num_blocks, i_run, i_block, ear, hand, start_time, duration)
+
+    for i_note = 1 : num_blocks
+        curr_row = (i_run - 1) * num_blocks + i_block;
+
+        data_table.block_num(curr_row) = i_block;
+        data_table.run_num(curr_row) = i_run;
+        data_table.ear(curr_row) = ear;
+        data_table.hand(curr_row) = hand;
+        data_table.start_time(curr_row) = start_time;
+        data_table.duration(curr_row) = duration;
     end
 end
-end
+
+
+

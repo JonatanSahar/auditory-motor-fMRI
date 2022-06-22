@@ -1,30 +1,40 @@
 % receive and synthesize note messages from midi in real time
-function [data_table] = playMIDI_t(group, midi_dev, train_len, window, data_table, i_block)
+function [start_time, duration] = processAndPlaybackMIDI(midi_dev, num_notes, window, i_run, i_block, ear, bMute)
+
+    if ~exist('mute','var')
+        % mute was not specified, default it to 0
+        bMute = 0;
+    end
+
+    if ~exist('ear','var')
+        % default to binaural playing
+        ear = 'both';
+    end
     midireceive(midi_dev);
     
     % initialize audio devices
     [osc, dev_writer] = intializeAudioDevices();
     % initialize input vectors
-    notes_vec = zeros(train_len * 2, 1);
-    timestamp_vec = zeros(train_len * 2, 1);
+    notes_vec = zeros(num_notes * 2, 1);
+    timestamp_vec = zeros(num_notes * 2, 1);
     
  
-    % display black screen
-    Screen('FillRect', window, [0, 0, 0])
-    Screen('Flip', window);
-    Screen('TextSize', window ,74);
-    Screen('DrawText',window, 'Play', (960), (540), [255, 255, 255]);
-    Screen('Flip', window);
-    
+    % % display black screen
+    % Screen('FillRect', window, [0, 0, 0])
+    % Screen('Flip', window);
+    % Screen('TextSize', window ,74);
+    % Screen('DrawText',window, 'Play', (960), (540), [255, 255, 255]);
+    % Screen('Flip', window);
+
     % activate metronome
-    [y,Fs] = audioread('25 BPM.wav');
-    y = y * 100;
-    y1 = [y(:,1), zeros(length(y),1)];
-    y2 = [zeros(length(y),1), y(:,1)];
-    
-   % receive midi input for train_len 
+    % [y,Fs] = audioread('25 BPM.wav');
+    % y = y * 100;
+    % y1 = [y(:,1), zeros(length(y),1)];
+    % y2 = [zeros(length(y),1), y(:,1)];
+
+   % receive midi input for num_notes
    note_ctr = 1;
-    while note_ctr <= train_len 
+    while note_ctr <= num_notes
         msgs = midireceive(midi_dev);
         for i = 1:numel(msgs)
             msg = msgs(i);
@@ -36,24 +46,18 @@ function [data_table] = playMIDI_t(group, midi_dev, train_len, window, data_tabl
                 osc.Amplitude = msg.Velocity/127;
                 
                 % update data table with note pressed and timestamp
-                if i_block ~= 0 && msg.Note ~= 0 %not familiarization phase
+                if i_block ~= 0 && msg.Note ~= 0 % not familiarization phase
                     notes_vec(note_ctr * 2 - 1) = msg.Note;
                     timestamp_vec(note_ctr * 2 - 1) = msg.Timestamp;
                 end
-                if note_ctr == 1
-                    if group == 1
-                        sound(y1,Fs);
-                    elseif group == 2
-                        sound(y2,Fs);
-                    end
-                     
-                end
-            elseif isNoteOff(msg) 
+
+                % end
+            elseif isNoteOff(msg)
                 if msg.Note == msg.Note
                     osc.Amplitude = 0;
                    
                      % update data table with note pressed and timestamp
-                    if i_block ~= 0 && msg.Note ~= 0 %not familiarization phase
+                    if i_block ~= 0 && msg.Note ~= 0 % not familiarization phase
                         notes_vec(note_ctr * 2) = msg.Note;
                         timestamp_vec(note_ctr * 2) = msg.Timestamp;
                     end
@@ -61,7 +65,7 @@ function [data_table] = playMIDI_t(group, midi_dev, train_len, window, data_tabl
                         if note_ctr == 1
                             time_of_first_note = toc(get_global_tic);
                         end
-                        if note_ctr == train_len
+                        if note_ctr == num_notes
                             time_of_last_note = toc(get_global_tic);
                             duration_of_playing = time_of_last_note - time_of_first_note;
                         end
@@ -72,25 +76,18 @@ function [data_table] = playMIDI_t(group, midi_dev, train_len, window, data_tabl
         end
         
         % play audio signal
-        mute = audioOscillator('sine', 'Amplitude', 0);
-        if group == 1
-            dev_writer([osc(), mute()]);
-        elseif group == 2
-            dev_writer([mute(), osc()]);
+        mute_waveform = audioOscillator('sine', 'Amplitude', 0);
+        if ~bMute
+            if ear == 'Right'
+                dev_writer([osc(), mute_waveform()]);
+            elseif ear == 'Left'
+                dev_writer([mute_waveform(), osc()]);
+            end
         end
-            
 
-        
     end
      clear sound
      
-   % update table from vectors between blocks
-    if istable(data_table)
-        data_table.block_num(i_block) = i_block;
-        data_table.start_time(i_block) = time_of_first_note;
-        data_table.play_duration(i_block) = duration_of_playing;
-     end
-
     % release objects
     release(osc);
     release(dev_writer);

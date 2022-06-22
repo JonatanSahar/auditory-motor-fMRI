@@ -14,27 +14,26 @@
 
 clc; clear; 
 addpath(fullfile(pwd, 'Auxiliary_Functions_MIDI_exp'));
-addpath(fullfile(pwd, 'instructions_bpm'));
+addpath(fullfile(pwd, 'instruction_images'));
 Screen('Preference', 'SkipSyncTests', 2);
 % Unify keyboard names across software platforms
 KbName('UnifyKeyNames');
     
 %% Define Parameters
 num_blocks = 20;
-seq_len = 8; %sequence len
+num_notes = 8; %sequence length
 seq_num = 5; % num of sequences in test
 familiar_len = 16; %num presses
-test_len = seq_len * seq_num; % num of key presses in a test block
-train_len = seq_len * seq_num;
 rest_len = 15; % in seconds
+
 IPI = 0.3;
 note_duration = 0.15;
 block_duration = 8;
 rest_duration = 8;
-block_and_rest_duration = block_duration + rest_duration
-
+block_and_rest_duration = block_duration + rest_duration;
+table_lines_per_block = 3;
 % start times of blocks, starting with a rest period
-run_timing = [rest_duration:block_and_rest_duration:block_and_rest_duration * (numBlocks+1)]
+run_timing = [rest_duration:block_and_rest_duration:block_and_rest_duration * (num_blocks+1)]
 
 
 %% Experiment Initialization
@@ -47,41 +46,64 @@ device2 = mididevice('Teensy MIDI');
 
 %% Initialize Data Tables
 % wanted parameters
-parameters = {'block_num', 'start_time', 'play_duration', 'ear', 'hand'};
-var_types = {'double', 'double', 'double', 'string', 'string'};
-% create tables
-[run_info_table, info_table_filename] = createTable(2, test_len, parameters, var_types, subject_number, 'run_info', group);
+parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'ear', 'hand'};
+var_types = {'double', 'double', 'double', 'double', 'string', 'string'};
 
+% create tables
+for table_name = ['motor_only_pre', 'motor_only_post', 'auditory_only']
+[run_info_table, info_table_filename] = createTable(num_blocks, table_lines_per_block, parameters, var_types, subject_number, 'run_info');
+
+[motor_only_pre_table, info_table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'motor_only_pre');
+
+[motor_only_post_table, info_table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'motor_only_post');
+
+[auditory_only_table, info_table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'auditory_only');
+
+[run_info_table, info_table_filename] = createTable(num_blocks, table_lines_per_block, parameters, var_types, subject_number, 'run_info');
 
 % create an assignment of conditions per block
 index_to_letter = ['R', 'L'];
 ears = [1, 2];
 hands = [1, 2];
 [X, Y] = meshgrid(ears, hands);
-prod = [X(:), Y(:)];
+condition_pairs = [X(:), Y(:)];
 assert(mod(num_blocks, length(prod)) == 0);
-conditions = repmat(prod, num_blocks/length(prod), 1);
-conditions = conditions(randperm(length(conditions)), :);
 
+% one condition per block, in original order -
+% shuffle it to get a randomized block order per run.
+conditions = repmat(condition_pairs, num_blocks/length(condition_pairs), 1);
 
 % initialize screen
  % HideCursor // TODO: restore
- [window, rect] = Screen('openwindow',0,[0, 0, 0], [0 0 640 480]);
- win_hight = rect(4) - rect(2);
+[window, rect] = init_screen();
+win_hight = rect(4) - rect(2);
  win_width = rect(3) - rect(1); 
 
 %% Phase 1: teaching subjects to play (without auditory feedback for now)
 
 %% TODO: Phase 2a: add a silent scan (motor only), instructions and blocks
-     instruction = imread('auditory_only_instructions.jpg');
+     instruction = imread('motor_only_instructions.jpg');
      display_image(instruction, window);
+
+
+     shuffled_conditions = conditions(randperm(length(conditions)), :);
+
      % wait for a key press in order to continue
-     KbWait;
-     WaitSecs(0.5);
+     % KbWait;
+     % WaitSecs(0.5);
+     waitForMRI()
+for i_block = 1:num_blocks
+    [ear, hand] = get_condition_for_block(shuffled_conditions, i_block);
+    instruct_file = get_instruction_file_for_condition([ear hand]);
+    instruction = imread(instruct_file);
+    display_image(instruction, window);
+    instruction = imread('play.jpg');
+    display_image(instruction, window);
 
-     instruction = imread('play.jpg');
-     display_image(instruction, window);
+    [start_time, duration] = processAndPlaybackMIDI(device, num_notes, window, 1, i_block, 'both', false);
+    updateTable(motor_only_pre_table, num_blocks, 2, i_block, ear, hand, start_time, duration)
 
+end
 
 
 %% TODO: Phase 2b: add a passive listening (auditory only), instructions and blocks
@@ -95,9 +117,9 @@ conditions = conditions(randperm(length(conditions)), :);
      % wait for a key press in order to continue
      KbWait;
      WaitSecs(0.5);
-     playMIDI(device, familiar_len, window, NaN, 0);
+     processAndPlaybackMIDI(device, num_notes, window, 1, i_block, 'both', false);
      restTest(rest_len, window);
-     playMIDI(device, familiar_len, window, NaN, 0);
+     processAndPlaybackMIDI(device, familiar_len, window, NaN, 0);
      load(fullfile(pwd, 'seq_mat'));
 
 
@@ -123,7 +145,7 @@ WaitSecs(0.5);
 for i_block = 1 : num_blocks
     % TODO: display instructions on which hand to play with, and which ear to expect feedback to.
     disp(i_block)
-    run_info_table = playMIDI_t(group, device, train_len, window, run_info_table, i_block);
+    run_info_table = processAndPlaybackMIDI(group, device, train_len, window, run_info_table, i_block);
     % force the wait to end exactly when we want the
     % next block to start.
     timeToWait = runTiming(i + 1)
