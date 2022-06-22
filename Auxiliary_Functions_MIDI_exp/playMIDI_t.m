@@ -88,9 +88,9 @@ function [data_table] = playMIDI_t(group, midi_dev, train_len, window, data_tabl
     if istable(data_table)
         data_table.block_num(i_block) = i_block;
         data_table.start_time(i_block) = time_of_first_note;
-        data_table.play_duration(i_block) = time_of_first_note;
+        data_table.play_duration(i_block) = duration_of_playing;
      end
-    
+
     % release objects
     release(osc);
     release(dev_writer);
