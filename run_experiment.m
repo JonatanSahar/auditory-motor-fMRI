@@ -20,20 +20,18 @@ Screen('Preference', 'SkipSyncTests', 2);
 KbName('UnifyKeyNames');
     
 %% Define Parameters
-num_blocks = 20;
+num_blocks = 2;
 num_notes = 8; %sequence length
-seq_num = 5; % num of sequences in test
-familiar_len = 16; %num presses
-rest_len = 15; % in seconds
 
 IPI = 0.3;
 note_duration = 0.15;
-block_duration = 8;
-rest_duration = 8;
+block_duration = 3;
+rest_duration = 2;
 block_and_rest_duration = block_duration + rest_duration;
 table_lines_per_block = 3;
 % start times of blocks, starting with a rest period
-run_timing = [rest_duration:block_and_rest_duration:block_and_rest_duration * (num_blocks+1)]
+block_end_times = [block_and_rest_duration : block_and_rest_duration : block_and_rest_duration * (num_blocks)]
+block_start_times = [rest_duration:block_and_rest_duration:block_and_rest_duration * (num_blocks)]
 
 
 %% Experiment Initialization
@@ -42,7 +40,7 @@ group = input('Please enter group number\n(1 = LE, 2 = RE)\n');
 subject_number = input('Please enter the subject''s number\n');
 
 % connect to midi device
-device2 = mididevice('Teensy MIDI');
+device = mididevice('Teensy MIDI');
 
 %% Initialize Data Tables
 % wanted parameters
@@ -50,7 +48,6 @@ parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'ear', 'han
 var_types = {'double', 'double', 'double', 'double', 'string', 'string'};
 
 % create tables
-for table_name = ['motor_only_pre', 'motor_only_post', 'auditory_only']
 [run_info_table, info_table_filename] = createTable(num_blocks, table_lines_per_block, parameters, var_types, subject_number, 'run_info');
 
 [motor_only_pre_table, info_table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'motor_only_pre');
@@ -81,30 +78,39 @@ win_hight = rect(4) - rect(2);
 
 %% Phase 1: teaching subjects to play (without auditory feedback for now)
 
-%% TODO: Phase 2a: add a silent scan (motor only), instructions and blocks
+%% Phase 2a: a motor only localizer + baseline for modulation
      instruction = imread('motor_only_instructions.jpg');
      display_image(instruction, window);
 
-
+     i_run = 1; % one localizer run
      shuffled_conditions = conditions(randperm(length(conditions)), :);
 
      % wait for a key press in order to continue
      % KbWait;
      % WaitSecs(0.5);
      waitForMRI()
-for i_block = 1:num_blocks
-    [ear, hand] = get_condition_for_block(shuffled_conditions, i_block);
-    instruct_file = get_instruction_file_for_condition([ear hand]);
-    instruction = imread(instruct_file);
-    display_image(instruction, window);
-    instruction = imread('play.jpg');
-    display_image(instruction, window);
+     set_global_tic()
+     for i_block = 1:num_blocks
+          % get the start time of next block
+         start_of_block_time = block_start_times(i_block);
+         end_of_block_time = block_end_times(i_block);
+         [ear, hand] = get_condition_for_block(shuffled_conditions, i_block)
+         instruct_file = get_instruction_file_for_condition([ear hand]);
+         instruction = imread(instruct_file);
+         display_image(instruction, window);
 
-    [start_time, duration] = processAndPlaybackMIDI(device, num_notes, window, 1, i_block, 'both', false);
-    updateTable(motor_only_pre_table, num_blocks, 2, i_block, ear, hand, start_time, duration)
+         waitForTimeOrEsc(start_of_block_time, true, get_global_tic());
 
-end
+         instruction = imread('play.jpg');
+         display_image(instruction, window);
 
+         [start_time, duration] = processAndPlaybackMIDI(device, num_notes, window, 1, i_block, 'both', false);
+         motor_only_pre_table = updateTable(motor_only_pre_table, num_blocks, i_run, i_block, index_to_letter(ear), index_to_letter(hand), start_time, duration)
+
+         waitForTimeOrEsc(end_of_block_time, true, get_global_tic());
+
+     end
+sca
 
 %% TODO: Phase 2b: add a passive listening (auditory only), instructions and blocks
 
