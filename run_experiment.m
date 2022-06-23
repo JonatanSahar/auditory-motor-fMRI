@@ -28,7 +28,7 @@ note_duration = 0.15;
 block_duration = 3;
 rest_duration = 2;
 block_and_rest_duration = block_duration + rest_duration;
-table_lines_per_block = 3;
+table_lines_per_block = 4; % 3 runs + familiarity
 % start times of blocks, starting with a rest period
 block_end_times = [block_and_rest_duration : block_and_rest_duration : block_and_rest_duration * (num_blocks)]
 block_start_times = [rest_duration:block_and_rest_duration:block_and_rest_duration * (num_blocks)]
@@ -48,7 +48,6 @@ parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'ear', 'han
 var_types = {'double', 'double', 'double', 'double', 'string', 'string'};
 
 % create tables
-[run_info_table, info_table_filename] = createTable(num_blocks, table_lines_per_block, parameters, var_types, subject_number, 'run_info');
 
 [motor_only_pre_table, info_table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'motor_only_pre');
 
@@ -59,7 +58,6 @@ var_types = {'double', 'double', 'double', 'double', 'string', 'string'};
 [run_info_table, info_table_filename] = createTable(num_blocks, table_lines_per_block, parameters, var_types, subject_number, 'run_info');
 
 % create an assignment of conditions per block
-index_to_letter = ['R', 'L'];
 ears = [1, 2];
 hands = [1, 2];
 [X, Y] = meshgrid(ears, hands);
@@ -74,88 +72,41 @@ conditions = repmat(condition_pairs, num_blocks/length(condition_pairs), 1);
  % HideCursor // TODO: restore
 [window, rect] = init_screen();
 win_hight = rect(4) - rect(2);
- win_width = rect(3) - rect(1); 
+win_width = rect(3) - rect(1);
 
 %% Phase 1: teaching subjects to play (without auditory feedback for now)
-
-%% Phase 2a: a motor only localizer + baseline for modulation
-     instruction = imread('motor_only_instructions.jpg');
-     display_image(instruction, window);
-
-     i_run = 1; % one localizer run
-     shuffled_conditions = conditions(randperm(length(conditions)), :);
-
-     % wait for a key press in order to continue
-     % KbWait;
-     % WaitSecs(0.5);
-     waitForMRI()
-     set_global_tic()
-     for i_block = 1:num_blocks
-          % get the start time of next block
-         start_of_block_time = block_start_times(i_block);
-         end_of_block_time = block_end_times(i_block);
-         [ear, hand] = get_condition_for_block(shuffled_conditions, i_block)
-         instruct_file = get_instruction_file_for_condition([ear hand]);
-         instruction = imread(instruct_file);
-         display_image(instruction, window);
-
-         waitForTimeOrEsc(start_of_block_time, true, get_global_tic());
-
-         instruction = imread('play.jpg');
-         display_image(instruction, window);
-
-         [start_time, duration] = processAndPlaybackMIDI(device, num_notes, window, 1, i_block, 'both', false);
-         motor_only_pre_table = updateTable(motor_only_pre_table, num_blocks, i_run, i_block, index_to_letter(ear), index_to_letter(hand), start_time, duration)
-
-         waitForTimeOrEsc(end_of_block_time, true, get_global_tic());
-
-     end
-sca
-
-%% TODO: Phase 2b: add a passive listening (auditory only), instructions and blocks
-
-
-%% Phase 3: playing with sound - the familiarity phase
-% instruction slide
-     instruction = imread('auditory_only_instructions.jpg');
-     display_image(instruction, window);
-
-     % wait for a key press in order to continue
-     KbWait;
-     WaitSecs(0.5);
-     processAndPlaybackMIDI(device, num_notes, window, 1, i_block, 'both', false);
-     restTest(rest_len, window);
-     processAndPlaybackMIDI(device, familiar_len, window, NaN, 0);
-     load(fullfile(pwd, 'seq_mat'));
-
-
-
-%% Phase 4: The experiment - a single run for now. TODO: decide how to program 3 runs.
-
-% instruction slide + 20 blocks
-% black screen during training and white screen during rest
-
-% display experiment instructions
-Screen('FillRect', window, [172, 172, 172])
-Screen('Flip', window);
-instruct2 = imread('instruction_train_LH.jpg');
-TexturePointer = Screen('MakeTexture',window, instruct2);
-clear instruct2;
-Screen('DrawTexture',window, TexturePointer);
-Screen('Flip', window);
-% wait for a key press in order to continue
+% TODO: decide how to do this - display a single slide with the sequence and let them practice by themselves? a block design to tell them which hand to practice with? inside or outside the scanner (or both)?
 KbWait;
 WaitSecs(0.5);
 
-% start the loop for this run
-for i_block = 1 : num_blocks
-    % TODO: display instructions on which hand to play with, and which ear to expect feedback to.
-    disp(i_block)
-    run_info_table = processAndPlaybackMIDI(group, device, train_len, window, run_info_table, i_block);
-    % force the wait to end exactly when we want the
-    % next block to start.
-    timeToWait = runTiming(i + 1)
-    waitForTimeOrEsc(timeToWait, 1, startTic);
+%% Phase 2a: a motor only localizer + baseline for modulation
+motor_localizer(window, device, motor_only_data_table, conditions, ...
+                num_blocks, block_start_times, block_end_times)
+KbWait;
+WaitSecs(0.5);
+
+%% Phase 2b: auditoiry only localizer
+auditory_localizer(window, device, auditory_only_data_table, conditions, ...
+                   num_blocks, block_start_times, block_end_times)
+KbWait;
+WaitSecs(0.5);
+
+%% Phase 3: playing with sound - the familiarity phase
+
+auditory_motor_single_run(window, device, run_info_table, conditions, num_blocks, block_start_times, block_end_times, 0) % 0 = familiarity run
+KbWait;
+WaitSecs(0.5);
+
+
+%% Phase 4: The experiment
+
+for i_run = 1:num_runs
+    auditory_motor_single_run(window, device, run_info_table, conditions, ...
+                              num_blocks, block_start_times, ...
+                              block_end_times, i_run)
+    KbWait;
+    WaitSecs(0.5);
+
 end
 
 %% Phase 5a: Motor Localizer (playing with no sound). TODO: decide if we want to extend this and use it to compare with the silent playing from before the experiment.
@@ -175,17 +126,9 @@ KbWait;
 WaitSecs(0.5);
 
 
-%% Phase 5b: Auditory Localizer (passive listening). TODO: decide if we want to extend this and use it to compare with the silent playing from before the experiment.
-%TODO: complete.
+%% Phase 5b: Second motor-only run  TODO: decide if we want to extend this and use it to compare with the silent playing from before the experiment.
 
-% display post test instructions
-Screen('FillRect', window, [172, 172, 172])
-Screen('Flip', window);
-instruct2 = imread('instruction_post_LH.jpg');
-TexturePointer = Screen('MakeTexture',window, instruct2);
-clear instruct2;
-Screen('DrawTexture',window, TexturePointer);
-Screen('Flip', window);
+motor_localizer(window, device, motor_only_post_table, conditions, num_blocks, block_start_times, block_end_times)
 
 % wait for a key press in order to continue
 KbWait;
@@ -196,4 +139,112 @@ sca;
 xl_path = fullfile(pwd, 'midi_data', 'LH');
 writetable(run_info_table, fullfile(xl_path, info_table_filename));
 
+function name = index_to_name(i)
+    names = ['R', 'L'];
+    name = names(i);
+end
 
+
+function motor_localizer(window, device, data_table, conditions, num_blocks, block_start_times, block_end_times)
+      instruction = imread('motor_only_instructions.jpg');
+      display_image(instruction, window);
+
+     i_run = 1; % one localizer run
+     shuffled_conditions = conditions(randperm(length(conditions)), :);
+
+     % wait for a key press in order to continue
+     % KbWait;
+     % WaitSecs(0.5);
+     waitForMRI()
+     set_global_tic()
+     for i_block = 1:num_blocks
+          % get the start time of next block
+         start_of_block_time = block_start_times(i_block);
+         end_of_block_time = block_end_times(i_block);
+         [ear, hand] = get_condition_for_block(shuffled_conditions, i_block)
+
+         instruct_file = get_instruction_file_for_condition([ear hand]);
+         instruction = imread(instruct_file);
+         display_image(instruction, window);
+
+         waitForTimeOrEsc(start_of_block_time, true, get_global_tic());
+
+         instruction = imread('play.jpg');
+         display_image(instruction, window);
+
+         [start_time, duration] = processAndPlaybackMIDI(device, num_notes, window, 1, i_block, 'both', true);
+         data_table = updateTable(data_table, num_blocks, i_run, i_block, index_to_name(ear), index_to_name(hand), start_time, duration)
+
+         waitForTimeOrEsc(end_of_block_time, true, get_global_tic());
+
+     end
+end
+
+
+function auditory_localizer(window, device, data_table, conditions, num_blocks, block_start_times, block_end_times)
+      instruction = imread('auditory_only_instructions.jpg');
+      display_image(instruction, window);
+
+     i_run = 1; % one localizer run
+     shuffled_conditions = conditions(randperm(length(conditions)), :);
+
+     % wait for a key press in order to continue
+     % KbWait;
+     % WaitSecs(0.5);
+     waitForMRI()
+     set_global_tic()
+     for i_block = 1:num_blocks
+          % get the start time of next block
+         start_of_block_time = block_start_times(i_block);
+         end_of_block_time = block_end_times(i_block);
+         [ear, hand] = get_condition_for_block(shuffled_conditions, i_block)
+
+         instruct_file = get_instruction_file_for_condition([ear hand]);
+         instruction = imread(instruct_file);
+         display_image(instruction, window);
+
+         waitForTimeOrEsc(start_of_block_time, true, get_global_tic());
+
+         instruction = imread('play.jpg');
+         display_image(instruction, window);
+
+         [start_time, duration] = processAndPlaybackMIDI(device, num_notes, window, 1, i_block, 'both', false);
+         data_table = updateTable(data_table, num_blocks, i_run, i_block, index_to_name(ear), index_to_name(hand), start_time, duration)
+
+         waitForTimeOrEsc(end_of_block_time, true, get_global_tic());
+
+     end
+end
+
+function auditory_motor_single_run(window, device, data_table, conditions, num_blocks, block_start_times, block_end_times, i_run)
+      instruction = imread('auditory_only_instructions.jpg');
+      display_image(instruction, window);
+      shuffled_conditions = conditions(randperm(length(conditions)), :);
+
+     % wait for a key press in order to continue
+     % KbWait;
+     % WaitSecs(0.5);
+     waitForMRI()
+     set_global_tic()
+     for i_block = 1:num_blocks
+          % get the start time of next block
+         start_of_block_time = block_start_times(i_block);
+         end_of_block_time = block_end_times(i_block);
+         [ear, hand] = get_condition_for_block(shuffled_conditions, i_block)
+
+         instruct_file = get_instruction_file_for_condition([ear hand]);
+         instruction = imread(instruct_file);
+         display_image(instruction, window);
+
+         waitForTimeOrEsc(start_of_block_time, true, get_global_tic());
+
+         instruction = imread('play.jpg');
+         display_image(instruction, window);
+
+         [start_time, duration] = processAndPlaybackMIDI(device, num_notes, window, 1, i_block, 'both', false);
+         data_table = updateTable(data_table, num_blocks, i_run, i_block, index_to_name(ear), index_to_name(hand), start_time, duration)
+
+         waitForTimeOrEsc(end_of_block_time, true, get_global_tic());
+
+     end
+end
