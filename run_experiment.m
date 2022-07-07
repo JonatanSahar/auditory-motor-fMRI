@@ -20,15 +20,15 @@ Screen('Preference', 'SkipSyncTests', 2);
 KbName('UnifyKeyNames');
     
 %% Define Parameters
-num_blocks = 2;
-num_notes = 8; %sequence length
+num_runs = 4;
+num_runs_motor_localizer = 2;
+num_blocks = 4; % should be 20
+num_notes = 8; % sequence length
 
-IPI = 0.3;
-note_duration = 0.15;
-block_duration = 3;
-rest_duration = 2;
+block_duration = 5; % in seconds
+rest_duration = 2; % in seconds
 block_and_rest_duration = block_duration + rest_duration;
-table_lines_per_block = 4; % 3 runs + familiarity
+table_lines_per_block = num_runs + 1; % runs + familiarity
 % start times of blocks, starting with a rest period
 block_end_times = [block_and_rest_duration : block_and_rest_duration : block_and_rest_duration * (num_blocks)]
 block_start_times = [rest_duration:block_and_rest_duration:block_and_rest_duration * (num_blocks)]
@@ -36,7 +36,7 @@ block_start_times = [rest_duration:block_and_rest_duration:block_and_rest_durati
 
 %% Experiment Initialization
 % get subject's details
-group = input('Please enter group number\n(1 = LE, 2 = RE)\n'); 
+% group = input('Please enter group number\n(1 = LE, 2 = RE)\n'); 
 subject_number = input('Please enter the subject''s number\n');
 
 % connect to midi device
@@ -62,7 +62,7 @@ ears = [1, 2];
 hands = [1, 2];
 [X, Y] = meshgrid(ears, hands);
 condition_pairs = [X(:), Y(:)];
-assert(mod(num_blocks, length(prod)) == 0);
+assert(mod(num_blocks, length(condition_pairs)) == 0);
 
 % one condition per block, in original order -
 % shuffle it to get a randomized block order per run.
@@ -93,17 +93,24 @@ WaitSecs(0.5);
 
 %% Phase 3: playing with sound - the familiarity phase
 
-auditory_motor_single_run(window, device, run_info_table, conditions, num_blocks, block_start_times, block_end_times, 0) % 0 = familiarity run
-KbWait;
+ auditory_motor_single_run(window, device, ...
+                              run_info_table, conditions,...
+                              num_blocks, block_start_times, ...
+                              block_end_times, 0, ...
+                              num_notes); % 0 = familiarity 
+runKbWait;
 WaitSecs(0.5);
 
 
 %% Phase 4: The experiment
 
 for i_run = 1:num_runs
-    auditory_motor_single_run(window, device, run_info_table, conditions, ...
+    auditory_motor_single_run(window, device, ...
+                              run_info_table, conditions,...
                               num_blocks, block_start_times, ...
-                              block_end_times, i_run)
+                              block_end_times, i_run, ...
+                              num_notes);
+
     KbWait;
     WaitSecs(0.5);
 
@@ -128,7 +135,8 @@ WaitSecs(0.5);
 
 %% Phase 5b: Second motor-only run  TODO: decide if we want to extend this and use it to compare with the silent playing from before the experiment.
 
-motor_localizer(window, device, motor_only_post_table, conditions, num_blocks, block_start_times, block_end_times)
+motor_localizer(window, device, motor_only_post_table, conditions, ...
+                num_blocks, block_start_times, block_end_times)
 
 % wait for a key press in order to continue
 KbWait;
@@ -145,76 +153,6 @@ function name = index_to_name(i)
 end
 
 
-function motor_localizer(window, device, data_table, conditions, num_blocks, block_start_times, block_end_times)
-      instruction = imread('motor_only_instructions.jpg');
-      display_image(instruction, window);
-
-     i_run = 1; % one localizer run
-     shuffled_conditions = conditions(randperm(length(conditions)), :);
-
-     % wait for a key press in order to continue
-     % KbWait;
-     % WaitSecs(0.5);
-     waitForMRI()
-     set_global_tic()
-     for i_block = 1:num_blocks
-          % get the start time of next block
-         start_of_block_time = block_start_times(i_block);
-         end_of_block_time = block_end_times(i_block);
-         [ear, hand] = get_condition_for_block(shuffled_conditions, i_block)
-
-         instruct_file = get_instruction_file_for_condition([ear hand]);
-         instruction = imread(instruct_file);
-         display_image(instruction, window);
-
-         waitForTimeOrEsc(start_of_block_time, true, get_global_tic());
-
-         instruction = imread('play.jpg');
-         display_image(instruction, window);
-
-         [start_time, duration] = processAndPlaybackMIDI(device, num_notes, window, 1, i_block, 'both', true);
-         data_table = updateTable(data_table, num_blocks, i_run, i_block, index_to_name(ear), index_to_name(hand), start_time, duration)
-
-         waitForTimeOrEsc(end_of_block_time, true, get_global_tic());
-
-     end
-end
-
-
-function auditory_localizer(window, device, data_table, conditions, num_blocks, block_start_times, block_end_times)
-      instruction = imread('auditory_only_instructions.jpg');
-      display_image(instruction, window);
-
-     i_run = 1; % one localizer run
-     shuffled_conditions = conditions(randperm(length(conditions)), :);
-
-     % wait for a key press in order to continue
-     % KbWait;
-     % WaitSecs(0.5);
-     waitForMRI()
-     set_global_tic()
-     for i_block = 1:num_blocks
-          % get the start time of next block
-         start_of_block_time = block_start_times(i_block);
-         end_of_block_time = block_end_times(i_block);
-         [ear, hand] = get_condition_for_block(shuffled_conditions, i_block)
-
-         instruct_file = get_instruction_file_for_condition([ear hand]);
-         instruction = imread(instruct_file);
-         display_image(instruction, window);
-
-         waitForTimeOrEsc(start_of_block_time, true, get_global_tic());
-
-         instruction = imread('play.jpg');
-         display_image(instruction, window);
-
-         [start_time, duration] = processAndPlaybackMIDI(device, num_notes, window, 1, i_block, 'both', false);
-         data_table = updateTable(data_table, num_blocks, i_run, i_block, index_to_name(ear), index_to_name(hand), start_time, duration)
-
-         waitForTimeOrEsc(end_of_block_time, true, get_global_tic());
-
-     end
-end
 
 function auditory_motor_single_run(window, device, data_table, conditions, num_blocks, block_start_times, block_end_times, i_run)
       instruction = imread('auditory_only_instructions.jpg');
