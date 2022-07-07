@@ -44,18 +44,23 @@ device = mididevice('Teensy MIDI');
 
 %% Initialize Data Tables
 % wanted parameters
-parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'ear', 'hand'};
-var_types = {'double', 'double', 'double', 'double', 'string', 'string'};
+parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'notes_vec', 'timestamp_vec', 'sequence_len', 'ear',        'hand'};
+var_types =  {'double',  'double',    'double',    'double', 'string', 'string'};
+
+midi_parameters = {'run_num', 'block_num', 'time_stamp', 'note', 'is_on', 'ipi'};
+midi_var_types =  {'double',  'double',    'double',    'double', 'double', 'double'};
 
 % create tables
+[motor_only_pre_table, motor_only_pre_table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'motor_only_pre');
 
-[motor_only_pre_table, info_table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'motor_only_pre');
+[motor_only_post_table, motor_only_post_table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'motor_only_post');
 
-[motor_only_post_table, info_table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'motor_only_post');
-
-[auditory_only_table, info_table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'auditory_only');
+[auditory_only_table, auditory_only_table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'auditory_only');
 
 [run_info_table, info_table_filename] = createTable(num_blocks, table_lines_per_block, parameters, var_types, subject_number, 'run_info');
+
+[midi_table, midi_table_filename] = createMidiTable(num_runs, num_blocks, num_notes, midi_parameters, midi_var_types, subject_number, 'midi');
+
 
 % create an assignment of conditions per block
 ears = [1, 2];
@@ -93,11 +98,16 @@ WaitSecs(0.5);
 
 %% Phase 3: playing with sound - the familiarity phase
 
- auditory_motor_single_run(window, device, ...
-                              run_info_table, conditions,...
-                              num_blocks, block_start_times, ...
-                              block_end_times, 0, ...
-                              num_notes); % 0 = familiarity 
+auditory_motor_single_run(window, ...
+                          device, ...
+                          midi_table, ...
+                          run_info_table, ...
+                          conditions,...
+                          num_notes, ...
+                          num_blocks,
+                          block_start_times, ...
+                          block_end_times, ...
+                          0); % 0 = familiarity
 runKbWait;
 WaitSecs(0.5);
 
@@ -105,11 +115,17 @@ WaitSecs(0.5);
 %% Phase 4: The experiment
 
 for i_run = 1:num_runs
-    auditory_motor_single_run(window, device, ...
-                              run_info_table, conditions,...
-                              num_blocks, block_start_times, ...
-                              block_end_times, i_run, ...
-                              num_notes);
+
+auditory_motor_single_run(window, ...
+                          device, ...
+                          midi_table, ...
+                          run_info_table, ...
+                          conditions,...
+                          num_notes, ...
+                          num_blocks,
+                          block_start_times, ...
+                          block_end_times, ...
+                          i_run); % 0 = familiarity
 
     KbWait;
     WaitSecs(0.5);
@@ -151,7 +167,6 @@ function name = index_to_name(i)
     names = ['R', 'L'];
     name = names(i);
 end
-
 
 
 function auditory_motor_single_run(window, device, data_table, conditions, num_blocks, block_start_times, block_end_times, i_run)

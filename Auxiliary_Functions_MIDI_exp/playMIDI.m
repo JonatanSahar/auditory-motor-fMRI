@@ -1,11 +1,12 @@
 % receive and synthesize note messages from midi in real time
-function [start_time, duration] = processAndPlaybackMIDI(midi_dev,...
-    num_notes, ...
-    window, ...
-    i_run, ...
-    i_block, ...
-    ear, ...
-    bMute)
+function [start_time, duration, notes_vec, timestamp_vec] = playMIDI(
+                                            midi_dev,...
+                                            num_notes, ...
+                                            window, ...
+                                            i_run, ...
+                                            i_block, ...
+                                            ear, ...
+                                            bMute)
 
 if ~exist('bMute','var')
     % mute was not specified, default it to 0
@@ -25,19 +26,6 @@ midireceive(midi_dev);
 notes_vec = zeros(num_notes * 2, 1);
 timestamp_vec = zeros(num_notes * 2, 1);
 
-
-% % display black screen
-% Screen('FillRect', window, [0, 0, 0])
-% Screen('Flip', window);
-% Screen('TextSize', window ,74);
-% Screen('DrawText',window, 'Play', (960), (540), [255, 255, 255]);
-% Screen('Flip', window);
-
-% activate metronome
-% [y,Fs] = audioread('25 BPM.wav');
-% y = y * 100;
-% y1 = [y(:,1), zeros(length(y),1)];
-% y2 = [zeros(length(y),1), y(:,1)];
 
 % receive midi input for num_notes
 note_ctr = 1;
@@ -64,17 +52,13 @@ while note_ctr <= num_notes
                 osc.Amplitude = 0;
                 
                 % update data table with note pressed and timestamp
-                if i_block ~= 0 && msg.Note ~= 0 % not familiarization phase
+                if i_block ~= 0 && msg.Note ~= 0 %not familiarization phase
                     notes_vec(note_ctr * 2) = msg.Note;
                     timestamp_vec(note_ctr * 2) = msg.Timestamp;
                 end
                 if msg.Note ~= 0
                     if note_ctr == 1
                         time_of_first_note = toc(get_global_tic);
-                    end
-                    if note_ctr == num_notes
-                        time_of_last_note = toc(get_global_tic);
-                        duration_of_playing = time_of_last_note - time_of_first_note;
                     end
                     note_ctr = note_ctr + 1;
                 end
@@ -98,13 +82,17 @@ while note_ctr <= num_notes
         end
     
 end
+
+time_of_last_note = toc(get_global_tic);
+duration_of_playing = time_of_last_note - time_of_first_note;
+
 clear sound
 
 % release objects
 release(osc);
 release(dev_writer);
 start_time = time_of_first_note;
-duration   = duration_of_playing;
+duration = duration_of_playing;
 end
 
 % convert left hand notes to be similar to right hand's
