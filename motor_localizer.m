@@ -11,6 +11,9 @@ function motor_localizer(window, device, data_table, conditions, num_blocks, blo
      % WaitSecs(0.5);
      waitForMRI()
      set_global_tic()
+     block_start_times = block_start_times + get_global_tic()
+     block_end_times = block_end_times + get_global_tic()
+
      for i_block = 1:num_blocks
           % get the start time of next block
          start_of_block_time = block_start_times(i_block);
