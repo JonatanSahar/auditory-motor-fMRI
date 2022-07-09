@@ -1,4 +1,3 @@
-
 function auditory_motor_single_run(window, ...
                                    device, ...
                                    midi_table, ...
@@ -10,7 +9,7 @@ function auditory_motor_single_run(window, ...
                                    block_end_times, ...
                                    i_run)
 
-      instruction = imread('auditory_only_instructions.jpg');
+      instruction = imread('auditory_motor_instructions.jpg');
       display_image(instruction, window);
       shuffled_conditions = conditions(randperm(length(conditions)), :);
 
@@ -18,9 +17,7 @@ function auditory_motor_single_run(window, ...
      % KbWait;
      % WaitSecs(0.5);
      waitForMRI()
-     set_global_tic()
-     block_start_times = get_global_tic()
-     block_end_times = get_global_tic()
+     start_tic = tic;
 
      for i_block = 1:num_blocks
           % get the start time of next block
@@ -32,17 +29,17 @@ function auditory_motor_single_run(window, ...
          instruction = imread(instruct_file);
          display_image(instruction, window);
 
-         waitForTimeOrEsc(start_of_block_time, true, get_global_tic());
+         waitForTimeOrEsc(start_of_block_time, true, start_tic);
 
          instruction = imread('play.jpg');
          display_image(instruction, window);
 
-         [start_time, duration, notes_vec, timestamp_vec] = playMIDI(device, num_notes, window, 1, i_block, 'both', false);
+         [start_time, duration, notes_vec, timestamp_vec] = playMIDI(device, num_notes, window, 1, i_block, ear, false);
 
          data_table = updateTable(data_table, num_blocks, i_run, i_block, index_to_name(ear), index_to_name(hand), start_time, duration)
 
          midi_data_table = updateMidiTable(midi_data_table, num_blocks, i_run, i_block, notes_vec, timestamp_vec)
-         waitForTimeOrEsc(end_of_block_time, true, get_global_tic());
+         waitForTimeOrEsc(end_of_block_time, true, start_tic);
 
      end
 end

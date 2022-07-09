@@ -6,7 +6,7 @@ function waitForTimeOrEsc(timeToWait, bAbsoluteTime, startTic)
     errID = 'myException:ESC';
     msg = 'ESC called';
     e = MException(errID,msg);
-    if ~exist('bAbsoluteTime','var') || bAbsoluteTime ~= true
+    if ~exist('bAbsoluteTime','var') or
         startTic = tic;
     % else fprintf("time left in run %f secs\n", timeToWait)
     end
