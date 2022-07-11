@@ -40,5 +40,5 @@ function motor_localizer(window, ...
 
          waitForTimeOrEsc(end_of_block_time, true, start_tic);
 
-     ends
+     end
 end

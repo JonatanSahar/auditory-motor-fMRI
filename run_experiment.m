@@ -7,8 +7,6 @@
 % The task has six phases:
 %
 % Remaining tasks:
-% TODO: complete documentation
-% TODO: complete instruction slides + export to jpg
 %
 %
 
@@ -40,7 +38,8 @@ subject_number = input('Please enter the subject''s number\n');
 
 % connect to midi device
 %device = mididevice('Teensy MIDI');
-device = 0;
+device = mididevice('LoopBe1');
+
 %% Initialize Data Tables
 % wanted parameters
 parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'ear',    'hand'};

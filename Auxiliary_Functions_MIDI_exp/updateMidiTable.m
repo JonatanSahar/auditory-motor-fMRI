@@ -1,7 +1,7 @@
 % update data table with block number, notes pressed and timestamps
 function midi_data_table = updateMidiTable(midi_data_table, num_blocks, i_run, i_block, notes_vec, timestamp_vec)
 
-update_len = len(notes_vec); % must always be 2 * sequence length
+update_len = length(notes_vec); % must always be 2 * sequence length
 for i_note = 1 : update_len
     curr_row = update_len * (i_run - 1 + i_block - 1) + i_note;
     midi_data_table.run_num(curr_row) = i_run;
