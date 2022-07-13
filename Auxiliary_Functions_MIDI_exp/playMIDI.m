@@ -79,9 +79,9 @@ while note_ctr <= num_notes
         if bMute
             dev_writer(mute_waveform());
         else
-            if strcmp(ear, 'Right')
+            if strcmp(ear, 'R')
                 dev_writer([osc(), mute_waveform()]);
-            elseif strcmp(ear, 'Left')
+            elseif strcmp(ear, 'L')
                 dev_writer([mute_waveform(), osc()]);
             elseif strcmp(ear, 'both')
                 dev_writer(osc());

@@ -2,21 +2,21 @@
 function file = get_instruction_file_for_condition(cond)
     ear = cond(1);
     hand = cond(2);
-    if cond == [1 1]
+    if cond == ["R" "R"]
         file = 'instructions_RR.jpg';
-    elseif cond == [1 2]
+    elseif cond == ["R" "L"]
         file = 'instructions_RL.jpg';
-    elseif cond == [2 1]
+    elseif cond == ["L" "R"]
         file = 'instructions_LR.jpg';
-    elseif cond == [2 2]
+    elseif cond == ["L" "L"]
         file = 'instructions_LL.jpg';
-    elseif cond == [0 1]
+    elseif cond == ["none" "R"]
         file = 'instructions_motor_only_R.jpg';
-    elseif cond == [0 2]
+    elseif cond == ["none" "L"]
         file = 'instructions_motor_only_L.jpg';
-    elseif cond == [1 0]
+    elseif cond == ["R" "none"]
         file = 'instructions_auditory_only_R.jpg';
-    elseif cond == [2 0]
+    elseif cond == ["L" "none"]
         file = 'instructions_auditory_only_L.jpg';
     
     end

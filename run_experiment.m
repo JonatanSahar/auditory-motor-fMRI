@@ -23,8 +23,8 @@ num_runs_motor_localizer = 2;
 num_blocks = 4; % should be 20
 num_notes = 8; % sequence length
 
-block_duration = 5; % in seconds
-rest_duration = 2; % in seconds
+block_duration = 8; % in seconds
+rest_duration = 3; % in seconds
 block_and_rest_duration = block_duration + rest_duration;
 table_lines_per_block = num_runs + 1; % runs + familiarity
 % start times of blocks, starting with a rest period
@@ -38,8 +38,7 @@ subject_number = input('Please enter the subject''s number\n');
 
 % connect to midi device
 %device = mididevice('Teensy MIDI');
-device = mididevice('LoopBe1');
-
+device = mididevice('LoopBe Internal MIDI');
 %% Initialize Data Tables
 % wanted parameters
 parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'ear',    'hand'};
@@ -50,9 +49,13 @@ midi_var_types =  {'double',  'double',    'double',    'double', 'double', 'dou
 
 % create tables
 [motor_only_pre_table, motor_only_pre_table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'motor_only_pre');
+
 [motor_only_post_table, motor_only_post_table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'motor_only_post');
+
 [auditory_only_table, auditory_only_table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'auditory_only');
-[run_info_table, info_table_filename] = createTable(num_blocks, table_lines_per_block, parameters, var_types, subject_number, 'run_info');
+
+[auditory_motor_table, auditory_motor_table_filename] = createTable(num_blocks, table_lines_per_block, parameters, var_types, subject_number, 'auditory_motor');
+
 [midi_table, midi_table_filename] = createMidiTable(num_runs, num_blocks, num_notes, midi_parameters, midi_var_types, subject_number, 'midi');
 
 
@@ -113,8 +116,14 @@ WaitSecs(0.5);
 
 %% Phase 2b: auditoiry only localizer
 % TODO: create instruction images for auditiory localizer
-auditory_localizer(window, device, auditory_only_data_table, motor_only_conditions, ...
-                   num_blocks, block_start_times, block_end_times)
+                auditory_localizer(window, ...
+                            device, ...
+                            auditory_only_table, ...
+                            auditory_only_conditions, ...
+                            num_blocks, ...
+                            num_notes, ...
+                            block_start_times, ...
+                            block_end_times)
 KbWait;
 WaitSecs(0.5);
 
@@ -123,8 +132,8 @@ WaitSecs(0.5);
 auditory_motor_single_run(window, ...
                           device, ...
                           midi_table, ...
-                          run_info_table, ...
-                          conditions,...
+                          auditory_motor_table, ...
+                          right_conditions,...
                           num_notes, ...
                           num_blocks, ...
                           block_start_times, ...
@@ -145,10 +154,10 @@ for i_run = 1:num_runs
 auditory_motor_single_run(window, ...
                           device, ...
                           midi_table, ...
-                          run_info_table, ...
+                          auditory_motor_table, ...
                           conditions,...
-                          num_notes, ...
                           num_blocks, ...
+                          num_notes, ...
                           block_start_times, ...
                           block_end_times, ...
                           i_run);
@@ -160,8 +169,14 @@ end
 
 
 %% Phase 5b: Second motor-only run  TODO: decide if we want to extend this and use it to compare with the silent playing from before the experiment.
-motor_localizer(window, device, motor_only_post_table, conditions, ...
-                num_blocks, block_start_times, block_end_times)
+motor_localizer(window, device, motor_only_post_table, motor_only_conditions, ...
+                num_blocks, num_notes, block_start_times, block_end_times)
+
+% end slide
+WaitSecs(0.5);
+instruction = imread('thank_you_end.jpg');
+display_image(instruction, window);
+
 
 % wait for a key press in order to continue
 KbWait;
@@ -173,6 +188,6 @@ excel_path = fullfile(pwd, 'output_data');
 
 writetable(motor_only_post_table, fullfile(excel_path, motor_only_post_table_filename));
 writetable(auditory_only_table, fullfile(excel_path, auditory_only_table_filename));
-writetable(run_info_table, fullfile(excel_path, info_table_filename));
-writetable(motor_only_pre_fullfile(excel_path, table, motor_only_pre_table_filename));
-writetable(midi_table, midi_fullfile(excel_path, table_filename));
+writetable(auditory_motor_table, fullfile(excel_path, auditory_motor_table_filename));
+writetable(motor_only_pre_table, fullfile(excel_path, motor_only_pre_table_filename));
+writetable(midi_table, fullfile(excel_path, midi_table_filename));
