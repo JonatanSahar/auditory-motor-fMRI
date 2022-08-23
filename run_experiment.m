@@ -5,7 +5,15 @@
 % Methods & Design:
 % Participants will perform a task using a MIDI keyboard and headphones.
 % The task has six phases:
-%
+
+%     1. Phase 1: teaching subjects to play (without auditory feedback for now)
+%     2. Phase 2a: a motor only localizer + baseline for modulation
+%     3. Phase 2b: auditoiry only localizer
+%     4. Phase 3: playing with sound - the familiarity phase
+%     5. Phase 4: The experiment itself, alternatly playing with either hand
+%                 while hearing in either ear
+%     6. Phase 5b: Second motor-only run
+
 % Remaining tasks:
 %
 %
@@ -24,7 +32,7 @@ num_blocks = 4; % should be 20
 num_notes = 8; % sequence length
 
 block_duration = 8; % in seconds
-rest_duration = 3; % in seconds
+rest_duration = 3; % in seconds, between blocks
 block_and_rest_duration = block_duration + rest_duration;
 table_lines_per_block = num_runs + 1; % runs + familiarity
 % start times of blocks, starting with a rest period
@@ -37,8 +45,8 @@ block_start_times = [rest_duration:block_and_rest_duration:block_and_rest_durati
 subject_number = input('Please enter the subject''s number\n');
 
 % connect to midi device
-%device = mididevice('Teensy MIDI');
-device = mididevice('LoopBe Internal MIDI');
+device = mididevice('Teensy MIDI');
+%device = mididevice('LoopBe Internal MIDI');
 %% Initialize Data Tables
 % wanted parameters
 parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'ear',    'hand'};

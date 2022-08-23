@@ -8,12 +8,6 @@ function [start_time, duration, notes_vec, timestamp_vec] = playMIDI( ...
                                             ear, ...
                                             bMute)
 
-%  start_time = 1;
-%  duration = 5;
-%  notes_vec = [1, 2, 3, 4, 5];
-%  timestamp_vec = [0.1, 0.2, 0.3, 0.4, 0.5];
-%  
-% end
 
 if ~exist('bMute','var')
     % mute was not specified, default it to 0
@@ -75,7 +69,7 @@ while note_ctr <= num_notes
     end
     
      % play audio signal
-        mute_waveform = audioOscillator('sine', 'Amplitude', 0);
+     mute_waveform = audioOscillator('sine', 'Amplitude', 0);
         if bMute
             dev_writer(mute_waveform());
         else
