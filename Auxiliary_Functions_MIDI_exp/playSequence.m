@@ -43,3 +43,5 @@ function playSequence(seq_mat, IPI, ear)
     release(osc);
     release(dev_writer);
 end
+
+

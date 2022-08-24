@@ -18,7 +18,10 @@ function waitForTimeOrEsc(timeToWait, bAbsoluteTime, startTic)
         if((toc(startTic)) >= timeToWait), timedOut = true; % fprintf("time passed %f secs\n", (toc(startTic)));
         else
             [ keyIsDown, keyTime, keyCode ] = KbCheck;
-            if keyCode(KbName('ESCAPE')), throw(e); end
+            if keyCode(KbName('ESCAPE'))
+                Screen('CloseAll');                
+                throw(e);
+            end
         end
     end
 end
