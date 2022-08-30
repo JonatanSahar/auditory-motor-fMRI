@@ -17,6 +17,8 @@ if ~exist('ear','var')
     ear = 'both';
 end
 
+ear
+
 midireceive(midi_dev);
 
 % initialize audio devices
@@ -31,7 +33,7 @@ note_ctr = 1;
 while note_ctr <= num_notes
     msgs = midireceive(midi_dev);
     for i = 1:numel(msgs)
-        msg = msgs(i);
+        msg = msgs(i)
         if isNoteOn(msg) % if note pressed
             % convert left hand notes to be similar to right hand's
             msg.Note = convertHand(msg.Note);

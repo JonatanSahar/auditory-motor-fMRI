@@ -1,8 +1,8 @@
 % play pre-training sequence
 function playSequence(seq_mat, IPI, ear)
     [osc, dev_writer] = intializeAudioDevices();
-    note_duration = 0.3;
-    num_repeats = 2;
+    note_duration = 0.5;
+    num_repeats = 1;
     time_between_repeats = 0.5;
     % loop sequence (messages) matrix
     WaitSecs(note_duration);
@@ -16,24 +16,21 @@ function playSequence(seq_mat, IPI, ear)
             % keep playing note for note_duration
             note_timing = tic;
             while toc(note_timing) < note_duration
-                tone = osc();
-                dev_writer(tone);
+                dev_writer(osc());
             end
         % pause between notes
         elseif isNoteOff(curr_msg)
-            if curr_msg.Note == curr_msg.Note
-                osc.Amplitude = 0;
-            end
-            pause(IPI - note_duration);
+                    osc.Amplitude = 0;
+                    pause(IPI - note_duration);
         end
 
         mute_waveform = audioOscillator('sine', 'Amplitude', 0);
         if strcmp(ear, 'R')
-            dev_writer([osc(), mute_waveform()]);
-        elseif strcmp(ear, 'L')
             dev_writer([mute_waveform(), osc()]);
+        elseif strcmp(ear, 'L')
+            dev_writer([osc(), mute_waveform()]);
         elseif strcmp(ear, 'both')
-            dev_writer(osc());
+            dev_writer([osc(), osc()]);
         end
 
     end

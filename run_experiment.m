@@ -26,7 +26,7 @@ Screen('Preference', 'SkipSyncTests', 2);
 KbName('UnifyKeyNames');
 
 %% Define Parameters
-skipLocalizers = 0;
+skipLocalizers = 1;
 
 num_runs = 1  ;
 num_runs_motor_localizer = 2;
@@ -51,8 +51,8 @@ block_start_times = [rest_duration:block_and_rest_duration:block_and_rest_durati
 subject_number = 1;
 
 % connect to midi device
-% device = mididevice('Teensy MIDI');
-device = mididevice('LoopBe Internal MIDI');
+device = mididevice('Teensy MIDI');
+% device = mididevice('LoopBe Internal MIDI');
 %% Initialize Data Tables
 % wanted parameters
 parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'ear',    'hand'};
@@ -115,7 +115,14 @@ auditory_only_conditions = repmat(condition_pairs, num_blocks/length(condition_p
 [window, rect] = init_screen();
 win_hight = rect(4) - rect(2);
 win_width = rect(3) - rect(1);
-
+    auditory_only_table =  auditory_localizer(window, ...
+        auditory_only_table, ...
+        auditory_only_conditions, ...
+        num_blocks, ...
+        block_start_times, ...
+        block_end_times)
+    
+    
 if ~skipLocalizers
     %% Phase 1: teaching subjects to play (without auditory feedback for now)
     % TODO: decide how to do this - display a single slide with the sequence and let them practice by themselves? a block design to tell them which hand to practice with? inside or outside the scanner (or both)?
@@ -130,7 +137,8 @@ if ~skipLocalizers
     fprintf("Press any key to continue");
     KbWait;
     WaitSecs(0.5);
-    
+    end %ifSkipLocalizers
+
     %% Phase 2b: auditoiry only localizer
     % TODO: create instruction images for auditiory localizer
     auditory_only_table =  auditory_localizer(window, ...
@@ -162,7 +170,6 @@ if ~skipLocalizers
     KbWait;
     WaitSecs(0.5);
     
-end %ifSkipLocalizers
 %% Phase 4: The experiment
 
 for i_run = 1:num_runs
