@@ -36,7 +36,7 @@ num_seqs_in_block = 2;
 num_notes = seq_length * num_seqs_in_block;
 
 block_duration = 8; % in seconds
-rest_duration = 3; % in seconds, between blocks
+rest_duration = 5; % in seconds, between blocks
 block_and_rest_duration = block_duration + rest_duration;
 table_lines_per_block = num_runs + 1; % runs + familiarity
 % start times of blocks, starting with a rest period
@@ -51,8 +51,8 @@ block_start_times = [rest_duration:block_and_rest_duration:block_and_rest_durati
 subject_number = 1;
 
 % connect to midi device
-device = mididevice('Teensy MIDI');
-% device = mididevice('LoopBe Internal MIDI');
+% device = mididevice('Teensy MIDI');
+device = mididevice('LoopBe Internal MIDI');
 %% Initialize Data Tables
 % wanted parameters
 parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'ear',    'hand'};
@@ -115,27 +115,35 @@ auditory_only_conditions = repmat(condition_pairs, num_blocks/length(condition_p
 [window, rect] = init_screen();
 win_hight = rect(4) - rect(2);
 win_width = rect(3) - rect(1);
-    auditory_only_table =  auditory_localizer(window, ...
+   
+    auditory_motor_single_run(window, ...
+        device, ...
+        midi_table, ...
+        auditory_motor_table, ...
+        right_conditions,...
+        num_notes, ...
+        num_blocks, ...
+        block_start_times, ...
+        block_end_times, ...
+        0); % 0 = familiarity
+
+     auditory_only_table =  auditory_localizer(window, ...
         auditory_only_table, ...
         auditory_only_conditions, ...
         num_blocks, ...
         block_start_times, ...
         block_end_times)
     
-    
 if ~skipLocalizers
     %% Phase 1: teaching subjects to play (without auditory feedback for now)
     % TODO: decide how to do this - display a single slide with the sequence and let them practice by themselves? a block design to tell them which hand to practice with? inside or outside the scanner (or both)?
-    fprintf("Press any key to continue");
-    KbWait;
     WaitSecs(0.5);
     
     %% Phase 2a: a motor only localizer + baseline for modulation
     % TODO: create instruction images for motor localizer
     motor_only_pre_table = motor_localizer(window, device, motor_only_pre_table, motor_only_conditions, ...
         num_blocks, num_notes, block_start_times, block_end_times)
-    fprintf("Press any key to continue");
-    KbWait;
+   
     WaitSecs(0.5);
     end %ifSkipLocalizers
 
@@ -147,8 +155,7 @@ if ~skipLocalizers
         num_blocks, ...
         block_start_times, ...
         block_end_times)
-    fprintf("Press any key to continue");
-    KbWait;
+
     WaitSecs(0.5);
     
     %% Phase 3: playing with sound - the familiarity phase
@@ -166,8 +173,6 @@ if ~skipLocalizers
     % catch
     % clc; clear; clear screen;
     % end
-    fprintf("Press any key to continue");
-    KbWait;
     WaitSecs(0.5);
     
 %% Phase 4: The experiment
@@ -189,8 +194,6 @@ for i_run = 1:num_runs
         block_end_times, ...
         i_run);
     
-    fprintf("Press any key to continue");
-    KbWait;
     WaitSecs(0.5);
     
 end

@@ -36,7 +36,7 @@ function [data_table, midi_data_table] = auditory_motor_single_run(window, ...
 
          % TODO: impose the lenght of the block inside playMIDI. Pass
          % end_of_block_time to it
-         [start_time, duration, notes_vec, timestamp_vec] = playMIDI(device, num_notes, i_block, ear, false);
+         [start_time, duration, notes_vec, timestamp_vec] = playMIDI(device, num_notes, i_block, ear, false, end_of_block_time);
 
          data_table = updateTable(data_table, num_blocks, i_run, i_block, ear, hand, start_time, duration)
 
