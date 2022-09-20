@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE keyboardmap>
+<keyboardmap version="1.0">
+    <mapping key=";" note="79"/>
+    <mapping key="L" note="77"/>
+    <mapping key="K" note="76"/>
+    <mapping key="J" note="74"/>
+    <mapping key="H" note="72"/>
+    <mapping key="G" note="55"/>
+    <mapping key="F" note="53"/>
+    <mapping key="D" note="52"/>
+    <mapping key="S" note="50"/>
+    <mapping key="A" note="48"/>
+</keyboardmap>
