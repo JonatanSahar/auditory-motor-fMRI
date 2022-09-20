@@ -34,7 +34,7 @@ function data_table = auditory_localizer(window, ...
          display_image(instruction, window);
 
          block_start_time = toc(run_start_tic);
-         playSequence(seq_mat, 0.4, ear);
+         playSequence(ear);
          duration = toc(run_start_tic);
          
          data_table = updateTable(data_table, num_blocks, i_run, i_block, ear, hand, block_start_time, duration);

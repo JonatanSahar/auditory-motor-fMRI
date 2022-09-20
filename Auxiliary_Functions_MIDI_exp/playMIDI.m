@@ -27,6 +27,9 @@ midireceive(midi_dev);
 
 % initialize audio devices
 [osc, dev_writer] = initializeAudioDevices();
+s = osc();
+mute_waveform = zeros(length(s), 1);
+
 % initialize input vectors
 notes_vec = zeros(num_notes * 2, 1);
 timestamp_vec = zeros(num_notes * 2, 1);
@@ -59,7 +62,7 @@ try
             elseif isNoteOff(msg)
                 if msg.Note == msg.Note
                     osc.Amplitude = 0;
-                    if i_block ~= 0 && msg.Note ~= 0 %not familiarization phase
+                    if i_block ~= 0 && msg.Note ~= 0 % not familiarization phase
                         notes_vec(note_ctr * 2) = msg.Note;
                         timestamp_vec(note_ctr * 2) = toc(get_global_tic); %msg.Timestamp;
                     end
@@ -73,13 +76,11 @@ try
             end
         end
         
-    
-    mute_waveform = audioOscillator('sine', 'Amplitude', 0);
     if bMute
-        dev_writer(mute_waveform());
+        dev_writer(mute_waveform);
     else
         if strcmp(ear, 'R')
-            dev_writer([mute_waveform(), osc()]);
+            dev_writer([mute_waveform, osc()]);
         elseif strcmp(ear, 'L')
             dev_writer([osc(), mute_waveform()]);
         elseif strcmp(ear, 'both')

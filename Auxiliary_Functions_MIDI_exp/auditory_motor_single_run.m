@@ -23,9 +23,9 @@ function [data_table, midi_data_table] = auditory_motor_single_run(window, ...
           % get the start time of next block
          start_of_block_time = block_start_times(i_block);
          end_of_block_time = block_end_times(i_block);
-         [ear, hand] = get_condition_for_block(shuffled_conditions, i_block)
+         [ear, hand] = get_condition_for_block(shuffled_conditions, i_block);
 
-         instruct_file = get_instruction_file_for_condition([ear hand])
+         instruct_file = get_instruction_file_for_condition([ear hand]);
          instruction = imread(instruct_file);
          display_image(instruction, window);
 
