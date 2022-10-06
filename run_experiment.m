@@ -200,12 +200,6 @@ for i_run = 1:num_runs
 end
 
 
-%% Phase 5b: Second motor-only run  TODO: decide if we want to extend this and use it to compare with the silent playing from before the experiment.
-if ~skipLocalizers
-motor_localizer(window, device, motor_only_post_table, motor_only_conditions, ...
-    num_blocks, num_notes, block_start_times, block_end_times)
-end % skipLocalizers
-
 % end slide
 WaitSecs(0.5);
 instruction = imread('thank_you_end.JPG');
