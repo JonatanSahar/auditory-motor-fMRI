@@ -52,8 +52,8 @@ block_start_times = [rest_duration:block_and_rest_duration:block_and_rest_durati
 subject_number = 1;
 
 % connect to midi device
-device = mididevice('Teensy MIDI');
-% device = mididevice('LoopBe Internal MIDI');
+% device = mididevice('Teensy MIDI');
+device = mididevice('LoopBe Internal MIDI');
 %% Initialize Data Tables
 % wanted parameters
 parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'ear',    'hand'};
@@ -128,12 +128,12 @@ win_width = rect(3) - rect(1);
 %         block_end_times, ...
 %         0); % 0 = familiarity
 % 
-%      auditory_only_table =  auditory_localizer(window, ...
-%         auditory_only_table, ...
-%         auditory_only_conditions, ...
-%         num_blocks, ...
-%         block_start_times, ...
-%         block_end_times)
+     auditory_only_table =  auditory_localizer(window, ...
+        auditory_only_table, ...
+        auditory_only_conditions, ...
+        num_blocks, ...
+        block_start_times, ...
+        block_end_times)
     
 if ~skipLocalizers
     %% Phase 1: teaching subjects to play (without auditory feedback for now)
@@ -208,7 +208,7 @@ end % skipLocalizers
 
 % end slide
 WaitSecs(0.5);
-instruction = imread('thank_you_end.jpg');
+instruction = imread('thank_you_end.JPG');
 display_image(instruction, window);
 
 

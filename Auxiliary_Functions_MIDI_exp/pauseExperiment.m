@@ -3,7 +3,7 @@
 function [train_table] = pauseExperiment(device, train_len, ...
     window, train_table, num_blocks, rest_len, seq_mat, block_num)
     % show options slide (repeat or continue)
-    instruct4 = imread('instruction4.jpg');
+    instruct4 = imread('instruction4.JPG');
     TexturePointer = Screen('MakeTexture',window, instruct4);
     clear instruct4;
     Screen('DrawTexture',window, TexturePointer);

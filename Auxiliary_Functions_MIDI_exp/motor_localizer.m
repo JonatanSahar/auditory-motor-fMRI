@@ -8,7 +8,7 @@ function data_table = motor_localizer(window, ...
                          block_start_times, ...
                          block_end_times)
 
-      instruction = imread('motor_only_instructions.jpg');
+      instruction = imread('motor_localizer.JPG');
       display_image(instruction, window);
 
      i_run = 1; % one localizer run
@@ -24,7 +24,7 @@ function data_table = motor_localizer(window, ...
           % get the start time of next block
          start_of_block_time = block_start_times(i_block);
          end_of_block_time = block_end_times(i_block);
-         [ear, hand] = get_condition_for_block(shuffled_conditions, i_block)
+         [ear, hand] = get_condition_for_block(shuffled_conditions, i_block);
 
          instruct_file = get_instruction_file_for_condition([ear hand]);
          instruction = imread(instruct_file);
@@ -32,7 +32,7 @@ function data_table = motor_localizer(window, ...
 
          waitForTimeOrEsc(start_of_block_time, true, start_tic);
 
-         instruction = imread('play.jpg');
+         instruction = imread('start.JPG');
          display_image(instruction, window);
 
          [start_time, duration] = playMIDI(device, num_notes, i_block, 'both', true);
