@@ -9,7 +9,7 @@ function [data_table, midi_data_table] = auditory_motor_single_run(window, ...
                                                                    block_end_times, ...
                                                                    i_run)
 % get the ear for this run - each run has audio to a constant ear, with hands changing between blocks
-    (ear, hand) = conditions(1);
+    [ear, hand] = get_condition_for_block(conditions, 1)
     if ear == "R"
         file = 'audiomotor_R_ear.JPG';
     else
