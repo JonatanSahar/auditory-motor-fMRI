@@ -26,11 +26,12 @@ Screen('Preference', 'SkipSyncTests', 2);
 KbName('UnifyKeyNames');
 
 %% Define Parameters
-skipLocalizers = 1;
+skipLocalizers = 0;
 
 num_runs = 1  ;
 num_runs_motor_localizer = 2;
-num_blocks = 4; % should be 20, must be multiple of 4.
+num_blocks = 16; % should be 20, must be multiple of 4.
+assert(mod(num_blocks, 4) == 0);
 seq_length = 5;
 num_seqs_in_block = 2;
 num_notes = seq_length * num_seqs_in_block;
