@@ -28,16 +28,18 @@ KbName('UnifyKeyNames');
 %% Define Parameters
 skipLocalizers = 0;
 
-num_runs = 1  ;
-num_runs_motor_localizer = 2;
-num_blocks = 16; % should be 20, must be multiple of 4.
+num_runs = 2; % should be 20, must be multiple of 4.
+num_runs_motor_localizer = 1;
+num_blocks_familiarity = 4;
+num_blocks = 20; % should be 20, must be multiple of 4.
 assert(mod(num_blocks, 4) == 0);
 seq_length = 5;
 num_seqs_in_block = 2;
 num_notes = seq_length * num_seqs_in_block;
 
 block_duration = 8; % in seconds
-rest_duration = 5; % in seconds, between blocks
+rest_duration = 8; % in seconds, between blocks
+rest_duration_familiarity = 3; % in seconds, between blocks
 block_and_rest_duration = block_duration + rest_duration;
 table_lines_per_block = num_runs + 1; % runs + familiarity
 % start times of blocks, starting with a rest period
@@ -81,6 +83,13 @@ right_ear = [2, 2];
 both_ears = [1, 2];
 no_motor = [0, 0];
 hands = [1, 2];
+
+% one condition per block, in original order -
+% shuffle it to get a randomized block order per run.
+[X, Y] = meshgrid(right_ear, hands);
+condition_pairs = [X(:), Y(:)];
+assert(mod(num_blocks_familiarity, length(condition_pairs)) == 0);
+familiarity_conditions = repmat(condition_pairs, num_blocks_familiarity/length(condition_pairs), 1);
 
 % one condition per block, in original order -
 % shuffle it to get a randomized block order per run.
@@ -165,9 +174,9 @@ end %skipLocalizers
         device, ...
         midi_table, ...
         auditory_motor_table, ...
-        right_conditions,...
+        familiarity_conditions,...
         num_notes, ...
-        num_blocks, ...
+        num_blocks_familiarity, ...
         block_start_times, ...
         block_end_times, ...
         0); % 0 = familiarity
