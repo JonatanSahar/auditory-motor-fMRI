@@ -26,7 +26,7 @@ Screen('Preference', 'SkipSyncTests', 2);
 KbName('UnifyKeyNames');
 
 %% Define Parameters
-skipLocalizers = 0;
+skipLocalizers = 1;
 
 num_runs = 2; % should be 20, must be multiple of 4.
 num_runs_motor_localizer = 1;
@@ -54,8 +54,8 @@ block_start_times = [rest_duration:block_and_rest_duration:block_and_rest_durati
 subject_number = 1;
 
 % connect to midi device
-device = mididevice('Teensy MIDI');
-% device = mididevice('LoopBe Internal MIDI');
+% device = mididevice('Teensy MIDI');
+device = mididevice('LoopBe Internal MIDI');
 %% Initialize Data Tables
 % wanted parameters
 parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'ear',    'hand'};
