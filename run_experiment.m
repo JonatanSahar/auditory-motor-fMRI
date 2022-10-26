@@ -26,9 +26,9 @@ Screen('Preference', 'SkipSyncTests', 2);
 KbName('UnifyKeyNames');
 
 %% Define Parameters
-skipLocalizers = 1;
+skipLocalizers = 0;
 
-num_runs = 2; % should be 20, must be multiple of 4.
+num_runs = 3; % should be 3
 num_runs_motor_localizer = 1;
 num_blocks_familiarity = 4;
 num_blocks = 20; % should be 20, must be multiple of 4.
@@ -41,10 +41,14 @@ block_duration = 8; % in seconds
 rest_duration = 8; % in seconds, between blocks
 rest_duration_familiarity = 3; % in seconds, between blocks
 block_and_rest_duration = block_duration + rest_duration;
+block_and_rest_duration_familiarity = block_duration + rest_duration_familiarity;
 table_lines_per_block = num_runs + 1; % runs + familiarity
 % start times of blocks, starting with a rest period
 block_end_times = [block_and_rest_duration : block_and_rest_duration : block_and_rest_duration * (num_blocks)];
 block_start_times = [rest_duration:block_and_rest_duration:block_and_rest_duration * (num_blocks)];
+
+block_end_times_familiarity = [block_and_rest_duration_familiarity : block_and_rest_duration_familiarity : block_and_rest_duration_familiarity * (num_blocks)];
+block_start_times_familiarity = [rest_duration_familiarity:block_and_rest_duration_familiarity:block_and_rest_duration_familiarity * (num_blocks)];
 
 %% Experiment Initialization
 % get subject's details
@@ -125,24 +129,6 @@ auditory_only_conditions = repmat(condition_pairs, num_blocks/length(condition_p
 [window, rect] = init_screen();
 win_hight = rect(4) - rect(2);
 win_width = rect(3) - rect(1);
-%    
-%     auditory_motor_single_run(window, ...
-%         device, ...
-%         midi_table, ...
-%         auditory_motor_table, ...
-%         right_conditions,...
-%         num_notes, ...
-%         num_blocks, ...
-%         block_start_times, ...
-%         block_end_times, ...
-%         0); % 0 = familiarity
-% 
-%      auditory_only_table =  auditory_localizer(window, ...
-%         auditory_only_table, ...
-%         auditory_only_conditions, ...
-%         num_blocks, ...
-%         block_start_times, ...
-%         block_end_times)
     
 if ~skipLocalizers
     %% Phase 1: teaching subjects to play (without auditory feedback for now)
@@ -177,13 +163,16 @@ end %skipLocalizers
         familiarity_conditions,...
         num_notes, ...
         num_blocks_familiarity, ...
-        block_start_times, ...
-        block_end_times, ...
+        block_start_times_familiarity, ...
+        block_end_times_familiarity, ...
         0); % 0 = familiarity
     % catch
     % clc; clear; clear screen;
     % end
     WaitSecs(0.5);
+
+    fprintf("Familiarization phase done!\nStarting experiment");
+
     
 %% Phase 4: The experiment
 
