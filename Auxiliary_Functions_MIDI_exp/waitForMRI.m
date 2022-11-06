@@ -10,7 +10,6 @@ function waitForMRI()
         end
         if keyCode(KbName('ESCAPE'))
             Screen('CloseAll');
-            clear all
             return
         end
     end

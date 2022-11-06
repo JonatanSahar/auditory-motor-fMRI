@@ -26,12 +26,20 @@ Screen('Preference', 'SkipSyncTests', 2);
 KbName('UnifyKeyNames');
 
 %% Define Parameters
-skipLocalizers = 0;
+skipLocalizers = 1;
+use_virtual_midi = 0;
+
 
 num_runs = 3; % should be 3
 num_runs_motor_localizer = 1;
 num_blocks_familiarity = 4;
 num_blocks = 20; % should be 20, must be multiple of 4.
+
+% num_runs = 1; % should be 3
+% num_runs_motor_localizer = 1;
+% num_blocks_familiarity = 4;
+% num_blocks = 4; % should be 20, must be multiple of 4.
+
 assert(mod(num_blocks, 4) == 0);
 seq_length = 5;
 num_seqs_in_block = 2;
@@ -54,12 +62,17 @@ block_start_times_familiarity = [rest_duration_familiarity:block_and_rest_durati
 % get subject's details
 % group = input('Please enter group number\n(1 = LE, 2 = RE)    \n');
 
-% subject_number = input('Please enter the subject''s number\n');
-subject_number = 1;
+subject_number = input('Please enter the subject''s number\n');
+% subject_number = 1;
 
 % connect to midi device
-% device = mididevice('Teensy MIDI');
-device = mididevice('LoopBe Internal MIDI');
+if use_virtual_midi
+    device = mididevice('LoopBe Internal MIDI');
+else
+    device = mididevice('Teensy MIDI');
+end
+
+
 %% Initialize Data Tables
 % wanted parameters
 parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'ear',    'hand'};
@@ -129,7 +142,8 @@ auditory_only_conditions = repmat(condition_pairs, num_blocks/length(condition_p
 [window, rect] = init_screen();
 win_hight = rect(4) - rect(2);
 win_width = rect(3) - rect(1);
-    
+
+try
 if ~skipLocalizers
     %% Phase 1: teaching subjects to play (without auditory feedback for now)
     % TODO: decide how to do this - display a single slide with the sequence and let them practice by themselves? a block design to tell them which hand to practice with? inside or outside the scanner (or both)?
@@ -197,6 +211,19 @@ for i_run = 1:num_runs
     
 end
 
+catch
+end
+
+%% Export Tables to Excel and Disconnect MIDI
+%% TODO: how to discsonnect the midi device??
+
+
+excel_path = fullfile(pwd, 'output_data');
+writetable(motor_only_post_table, fullfile(excel_path, motor_only_post_table_filename));
+writetable(auditory_only_table, fullfile(excel_path, auditory_only_table_filename));
+writetable(auditory_motor_table, fullfile(excel_path, auditory_motor_table_filename));
+writetable(motor_only_pre_table, fullfile(excel_path, motor_only_pre_table_filename));
+writetable(midi_table, fullfile(excel_path, midi_table_filename));
 
 % end slide
 WaitSecs(0.5);
@@ -209,14 +236,3 @@ fprintf("Press any key to continue");
 KbWait;
 WaitSecs(0.5);
 sca;
-
-%% Export Tables to Excel and Disconnect MIDI
-excel_path = fullfile(pwd, 'output_data');
-
-writetable(motor_only_post_table, fullfile(excel_path, motor_only_post_table_filename));
-writetable(auditory_only_table, fullfile(excel_path, auditory_only_table_filename));
-writetable(auditory_motor_table, fullfile(excel_path, auditory_motor_table_filename));
-writetable(motor_only_pre_table, fullfile(excel_path, motor_only_pre_table_filename));
-writetable(midi_table, fullfile(excel_path, midi_table_filename));
-
-    

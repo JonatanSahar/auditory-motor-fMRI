@@ -8,6 +8,7 @@ function [start_time, duration, notes_vec, timestamp_vec] = playMIDI( ...
     end_of_block_time)
 
 
+caught = 0;
 if ~exist('bMute','var')
     mute was not specified, default it to 0
     bMute = 0;
@@ -37,14 +38,14 @@ timestamp_vec = zeros(num_notes * 2, 1);
 try
     %     receive midi input for num_notes
     note_ctr = 1;
-    while note_ctr <= num_notes
+    while note_ctr <= num_notes * 2
         if((toc(get_global_tic())) >= end_of_block_time)
             fprintf('************\nTime exceeded!\n************\n')
 
             release(osc);
             release(dev_writer);
 
-            throw(MException('Yonatan:time exceeded','time exceeded'));
+            throw(MException('MATLAB:badMojo','time exceeded'));
         else
             [keyIsDown, keyTime, keyCode] = KbCheck;
             if keyCode(KbName('ESCAPE'))
@@ -52,7 +53,7 @@ try
 
                 release(osc);
                 release(dev_writer);
-                throw(MException('Yonatan:Escape called','Escape called'));
+                throw(MException('MATLAB:badMojo','ESC called'));
 
             end
         end
@@ -108,10 +109,12 @@ try
     duration_of_playing = time_of_last_note - time_of_first_note;
 
 catch
+    caught = 1;
 end % try/catch
 
 clear sound
 
+fprintf("caught = %d\n", caught)
 % release objects
 release(osc);
 release(dev_writer);
