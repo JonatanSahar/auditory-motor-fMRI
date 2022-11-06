@@ -21,6 +21,7 @@ clc; clear; clear all;
 addpath(fullfile(pwd));
 addpath(fullfile(pwd, 'Auxiliary_Functions_MIDI_exp'));
 addpath(fullfile(pwd, 'instruction_images'));
+Screen('Preference', 'VisualDebugLevel', 3); % skip PTB's intro screen
 Screen('Preference', 'SkipSyncTests', 2);
 % Unify keyboard names across software platforms
 KbName('UnifyKeyNames');
@@ -35,10 +36,10 @@ num_runs_motor_localizer = 1;
 num_blocks_familiarity = 4;
 num_blocks = 20; % should be 20, must be multiple of 4.
 
-% num_runs = 1; % should be 3
-% num_runs_motor_localizer = 1;
-% num_blocks_familiarity = 4;
-% num_blocks = 4; % should be 20, must be multiple of 4.
+num_runs = 1; % should be 3
+num_runs_motor_localizer = 1;
+num_blocks_familiarity = 4;
+num_blocks = 4; % should be 20, must be multiple of 4.
 
 assert(mod(num_blocks, 4) == 0);
 seq_length = 5;
