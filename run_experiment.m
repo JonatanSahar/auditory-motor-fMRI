@@ -26,8 +26,9 @@ Screen('Preference', 'SkipSyncTests', 2);
 KbName('UnifyKeyNames');
 
 %% Define Parameters
-skipLocalizers = 1;
+skipLocalizers = 0;
 use_virtual_midi = 0;
+demo_run = 1;
 
 
 num_runs = 3; % should be 3
@@ -35,10 +36,12 @@ num_runs_motor_localizer = 1;
 num_blocks_familiarity = 4;
 num_blocks = 20; % should be 20, must be multiple of 4.
 
-% num_runs = 1; % should be 3
-% num_runs_motor_localizer = 1;
-% num_blocks_familiarity = 4;
-% num_blocks = 4; % should be 20, must be multiple of 4.
+if demo_run % override values for a shorter run
+    num_runs = 1; 
+    num_runs_motor_localizer = 1;
+    num_blocks_familiarity = 4;
+    num_blocks = 4; 
+end
 
 assert(mod(num_blocks, 4) == 0);
 seq_length = 5;
