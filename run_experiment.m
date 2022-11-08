@@ -21,6 +21,7 @@ clc; clear; clear all;
 addpath(fullfile(pwd));
 addpath(fullfile(pwd, 'Auxiliary_Functions_MIDI_exp'));
 addpath(fullfile(pwd, 'instruction_images'));
+Screen('Preference', 'VisualDebugLevel', 3); % skip PTB's intro screen
 Screen('Preference', 'SkipSyncTests', 2);
 % Unify keyboard names across software platforms
 KbName('UnifyKeyNames');
