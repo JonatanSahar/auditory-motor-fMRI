@@ -28,7 +28,7 @@ KbName('UnifyKeyNames');
 
 %% Define Parameters
 skipLocalizers = 0;
-use_virtual_midi = 1;
+use_virtual_midi = 0;
 demo_run = 1;
 
 
@@ -51,11 +51,11 @@ seq_length = 5;
 num_seqs_in_block = 2;
 num_notes = seq_length * num_seqs_in_block;
 
-instruction_display_duration = 3; % in seconds
+instruction_display_duration = 2; % in seconds
 
 
-block_duration = 2; % in seconds
-rest_duration = 2; % in seconds, between blocks
+block_duration = 8; %8 in seconds
+rest_duration = 8; %8 in seconds, between blocks
 rest_duration_fam = 3; % in seconds, between blocks
 block_and_rest_duration = block_duration + rest_duration;
 cycle_time = block_and_rest_duration + instruction_display_duration; % block+washout+instruction display
@@ -180,7 +180,7 @@ if ~skipLocalizers
                                       block_start_times, ...
                                       block_end_times,...
                                       INVALID_RUN_NUM, 'motor_loc' );
-   
+
     WaitSecs(0.5);
 
     %% Phase 2b: auditoiry only localizer

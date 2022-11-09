@@ -6,7 +6,7 @@ function [start_time, duration, notes_vec, timestamp_vec] = playMIDI( ...
     ear, ...
     bMute, ...
     end_of_block_time,...
-    start_of_block_tic)
+    start_of_run_tic)
 
 
 caught = 0;
@@ -39,25 +39,22 @@ timestamp_vec = zeros(num_notes * 2, 1);
 try
     %     receive midi input for num_notes
     note_ctr = 1;
-    while note_ctr <= num_notes * 2
-        if((toc((start_of_block_tic))) >= end_of_block_time)
-            fprintf('************\nTime exceeded!\n************\n')
+    while (note_ctr <= num_notes) && ((toc((start_of_run_tic))) <= end_of_block_time)
+        % if((toc((start_of_run_tic))) >= end_of_block_time)
+        %     fprintf('************\nTime exceeded!\n************\n')
 
-            release(osc);
-            release(dev_writer);
+        %     release(osc);
+        %     release(dev_writer);
 
-            throw(MException('MATLAB:badMojo','time exceeded'));
-        else
+        %     throw(MException('MATLAB:badMojo','time exceeded'));
+        % else
             [keyIsDown, keyTime, keyCode] = KbCheck;
             if keyCode(KbName('ESCAPE'))
                 fprintf('************\nEscape called!\n************\n')
-
-                release(osc);
-                release(dev_writer);
                 throw(MException('MATLAB:badMojo','ESC called'));
 
             end
-        end
+        % end
 
         msgs = midireceive(midi_dev);
         for i = 1:numel(msgs)
@@ -72,7 +69,7 @@ try
                 % update data table with note pressed and timestamp
                 if i_block ~= 0 && msg.Note ~= 0 % not familiarization phase
                     notes_vec(note_ctr * 2 - 1) = msg.Note;
-                    timestamp_vec(note_ctr * 2 - 1) = toc(get_global_tic); %msg.Timestamp;
+                    timestamp_vec(note_ctr * 2 - 1) = toc(start_of_run_tic); %msg.Timestamp;
                 end
 
             elseif isNoteOff(msg)
@@ -80,11 +77,11 @@ try
                     osc.Amplitude = 0;
                     if i_block ~= 0 && msg.Note ~= 0 % not familiarization phase
                         notes_vec(note_ctr * 2) = msg.Note;
-                        timestamp_vec(note_ctr * 2) = toc(get_global_tic); %msg.Timestamp;
+                        timestamp_vec(note_ctr * 2) = toc(start_of_run_tic); %msg.Timestamp;
                     end
                     if msg.Note ~= 0
                         if note_ctr == 1
-                            time_of_first_note = toc(get_global_tic);
+                            time_of_first_note = toc(start_of_run_tic);
                         end
                         note_ctr = note_ctr + 1;
                     end
@@ -106,11 +103,14 @@ try
 
     end % while
 
-    time_of_last_note = toc(get_global_tic);
-    duration_of_playing = time_of_last_note - time_of_first_note;
+    if ((toc((start_of_run_tic))) <= end_of_block_time) % we didn't exceed the time
+        time_of_last_note = toc(start_of_run_tic);
+        duration_of_playing = time_of_last_note - time_of_first_note;
+    end
 
-catch
+catch E
     caught = 1;
+    rethrow(E)
 end % try/catch
 
 clear sound
