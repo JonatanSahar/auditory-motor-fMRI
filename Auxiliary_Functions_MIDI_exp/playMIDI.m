@@ -5,7 +5,8 @@ function [start_time, duration, notes_vec, timestamp_vec] = playMIDI( ...
     i_block, ...
     ear, ...
     bMute, ...
-    end_of_block_time)
+    end_of_block_time,...
+    start_of_block_tic)
 
 
 caught = 0;
@@ -39,7 +40,7 @@ try
     %     receive midi input for num_notes
     note_ctr = 1;
     while note_ctr <= num_notes * 2
-        if((toc(get_global_tic())) >= end_of_block_time)
+        if((toc((start_of_block_tic))) >= end_of_block_time)
             fprintf('************\nTime exceeded!\n************\n')
 
             release(osc);
