@@ -66,14 +66,14 @@ table_lines_per_block = num_runs + 1; % runs + fam
 % start times of blocks, starting with a rest period
 instruction_display_times = [rest_duration : ...
                      cycle_time : ...
-                     cycle_time * (num_blocks)];
+                             cycle_time * (num_blocks + 1)]; % +1 because we need to wait one last fixation/washout after the last block, and the wait is always untill the next instruction
 
 block_start_times = instruction_display_times + instruction_display_duration;
 block_end_times = block_start_times + block_duration;
 
 instruction_display_times_fam = [rest_duration_fam : ...
                      cycle_time_fam : ...
-                     cycle_time_fam * (num_blocks_fam)];
+                                 cycle_time_fam * (num_blocks_fam + 1)]; % see note above about +1
 
 block_start_times_fam = instruction_display_times_fam + instruction_display_duration;
 block_end_times_fam = block_start_times_fam + block_duration;
