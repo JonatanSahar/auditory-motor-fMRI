@@ -4,6 +4,7 @@ function [start_time, duration, notes_vec, timestamp_vec] = playMIDI( ...
     num_notes, ...
     i_block, ...
     ear, ...
+    hand, ...
     bMute, ...
     end_of_block_time,...
     start_of_run_tic)
@@ -25,6 +26,8 @@ ERROR_CODE = 999;
 time_of_last_note = ERROR_CODE;
 duration_of_playing = ERROR_CODE;
 time_of_first_note = ERROR_CODE;
+correct_notes_R  = repmat([79, 77, 76, 74, 72], 1, 2);
+correct_notes_L  = repmat([48, 50, 52, 53, 55], 1, 2);
 midireceive(midi_dev);
 
 % initialize audio devices
@@ -33,6 +36,7 @@ s = osc();
 mute_waveform = zeros(length(s), 1);
 
 % initialize input vectors
+err_detect_vec = zeros(num_notes * 2, 1);
 notes_vec = zeros(num_notes * 2, 1);
 timestamp_vec = zeros(num_notes * 2, 1);
 
@@ -61,6 +65,7 @@ try
             msg = msgs(i);
             if isNoteOn(msg) % if note pressed
                 % convert left hand notes to be similar to right hand's
+                err_detect_vec(note_ctr) = msg.note;
                 msg.Note = convertHand(msg.Note);
                 % synthesize an audio signal
                 osc.Frequency = note2Freq(msg.Note);
@@ -73,7 +78,6 @@ try
                 end
 
             elseif isNoteOff(msg)
-                if msg.Note == msg.Note
                     osc.Amplitude = 0;
                     if i_block ~= 0 && msg.Note ~= 0 % not familiarization phase
                         notes_vec(note_ctr * 2) = msg.Note;
@@ -85,7 +89,6 @@ try
                         end
                         note_ctr = note_ctr + 1;
                     end
-                end
             end
         end
 
@@ -121,6 +124,25 @@ release(osc);
 release(dev_writer);
 start_time = time_of_first_note;
 duration = duration_of_playing;
+played_notes = nonzeros(err_detect_vec)'
+if strcmp(hand, 'R')
+    correct_notes = correct_notes_R;
+elseif strcmp(hand, 'L')
+    correct_notes = correct_notes_L;
+end
+
+if numel(played_notes) ~= numel(correct_notes)
+    fprintf("*** WRONG NUMBER OF NOTES PLAYED: %d INSTEAD OF %d ***",  numel(played_notes), numel(correct_notes))
+end
+
+if played_notes ~= correct_notes
+    fprintf("*** WRONG NOTES PLAYED: []")
+    fprintf('%g ', played_notes);
+    fprintf('] ***\n');
+end
+
+
+
 end
 
 % convert left hand notes to be similar to right hand's
