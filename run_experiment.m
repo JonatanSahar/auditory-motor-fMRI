@@ -27,7 +27,7 @@ Screen('Preference', 'SkipSyncTests', 2);
 KbName('UnifyKeyNames');
 
 %% Define Parameters
-skipLocalizers = 0;
+skip_to_experiment = 0;
 use_virtual_midi = 1;
 demo_run = 1;
 
@@ -35,6 +35,7 @@ demo_run = 1;
 INVALID_RUN_NUM = 0;
 
 num_runs = 3; % should be 3
+
 num_runs_motor_localizer = 1;
 num_blocks_fam = 4;
 num_blocks = 20; % should be 20, must be multiple of 4.
@@ -168,7 +169,7 @@ global small_window
 [small_window, rect] = init_screen(true);
 
 try
-if ~skipLocalizers
+if ~skip_to_experiment
 
     %% Phase 2a: a motor only localizer + baseline for modulation
     % TODO: create instruction images for motor localizer
@@ -200,7 +201,6 @@ if ~skipLocalizers
                                       block_end_times, ...
                                       INVALID_RUN_NUM, 'auditory_loc' );
 
-end %skipLocalizers
     WaitSecs(0.5);
     
     %% Phase 3: playing with sound - the familiraity phase
@@ -221,6 +221,7 @@ end %skipLocalizers
 
     fprintf("Familiarization phase done!\nStarting experiment\n");
 
+end %skip_to_experiment
     
 %% Phase 4: The experiment
 
