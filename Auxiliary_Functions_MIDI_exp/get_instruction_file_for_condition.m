@@ -1,7 +1,7 @@
 
 function file = get_instruction_file_for_condition(cond)
-    ear = cond(1)
-    hand = cond(2)
+    ear = cond(1);
+    hand = cond(2);
 
     file = sprintf('%s.JPG', hand);
 end

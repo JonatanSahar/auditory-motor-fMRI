@@ -117,7 +117,6 @@ end % try/catch
 
 clear sound
 
-fprintf("caught = %d\n", caught)
 % release objects
 release(osc);
 release(dev_writer);
@@ -125,7 +124,7 @@ start_time = time_of_first_note;
 duration = duration_of_playing;
 
 % detect errors in block
-played_notes = nonzeros(err_detect_vec)'
+played_notes = nonzeros(err_detect_vec)';
 err = false;
 err_type = "none";
 if strcmp(hand, 'R')
@@ -136,19 +135,19 @@ end
 
 if numel(played_notes) ~= numel(correct_notes)
     err = true;
-    err_type = "err_num_notes"
+    err_type = "err_num_notes";
     fprintf("*** WRONG NUMBER OF NOTES PLAYED: %d INSTEAD OF %d ***\n",  ...
             numel(played_notes), numel(correct_notes))
 
 elseif played_notes ~= correct_notes
     err = true;
-    err_type = "err_wrong_notes"
+    err_type = "err_wrong_notes";
 
-    fprintf("***\n WRONG NOTES PLAYED! ***\n")
+    fprintf("*** WRONG NOTES PLAYED! ***\n")
 
     other_hand_notes = ~ismember(played_notes, correct_notes)
     if any(other_hand_notes)
-    err_type = "err_wrong_hand"
+    err_type = "err_wrong_hand";
     fprintf("*** NOTES PLAYED with wrong hand! ***\n")
     end
 end
@@ -165,7 +164,7 @@ if err
     %      display_image(error_message, window);
     %      waitForTimeOrEsc(instruction_time, true, start_tic);
 
-    fprintf("***\n Played notes: [")
+    fprintf("*** Played notes: [")
     fprintf('%g ', played_notes);
     fprintf('] instead of [')
     fprintf('%g ', correct_notes);
