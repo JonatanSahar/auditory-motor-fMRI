@@ -31,7 +31,7 @@ end
     % KbWait;
     % WaitSecs(0.5);
     waitForMRI()
-    start_tic = tic % set_global_tic()
+    start_tic = tic;
 
     for i_block = 1:num_blocks
         % get the start time of next block
@@ -71,10 +71,10 @@ end
          duration = toc(start_tic);
     end
 
-        data_table = updateTable(data_table, num_blocks, i_run, i_block, ear, hand, start_time, duration)
+        data_table = updateTable(data_table, num_blocks, i_run, i_block, ear, hand, start_time, duration);
 
         if strcmp(run_type, 'audiomotor')
-            midi_data_table = updateMidiTable(midi_data_table, i_run, i_block, notes_vec, timestamp_vec)
+            midi_data_table = updateMidiTable(midi_data_table, i_run, i_block, notes_vec, timestamp_vec);
         end
         waitForTimeOrEsc(end_of_block_time, true, start_tic);
 

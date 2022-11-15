@@ -28,7 +28,7 @@ KbName('UnifyKeyNames');
 
 %% Define Parameters
 skipLocalizers = 0;
-use_virtual_midi = 0;
+use_virtual_midi = 1;
 demo_run = 1;
 
 
@@ -160,9 +160,12 @@ auditory_only_conditions = repmat(condition_pairs, num_blocks/length(condition_p
 
 % initialize screen
 % HideCursor // TODO: restore
-[window, rect] = init_screen();
+[window, rect] = init_screen(false);
 win_hight = rect(4) - rect(2);
 win_width = rect(3) - rect(1);
+
+global small_window
+[small_window, rect] = init_screen(true);
 
 try
 if ~skipLocalizers

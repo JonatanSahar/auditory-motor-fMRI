@@ -9,12 +9,11 @@ function [start_time, duration, notes_vec, timestamp_vec] = playMIDI( ...
     end_of_block_time,...
     start_of_run_tic)
 
-
 caught = 0;
 if ~exist('bMute','var')
     mute was not specified, default it to 0
     bMute = 0;
-end
+end     
 
 if ~exist('ear','var')
     default to binaural playing
@@ -124,7 +123,11 @@ release(osc);
 release(dev_writer);
 start_time = time_of_first_note;
 duration = duration_of_playing;
+
+% detect errors in block
 played_notes = nonzeros(err_detect_vec)'
+err = false;
+err_type = "none";
 if strcmp(hand, 'R')
     correct_notes = correct_notes_R;
 elseif strcmp(hand, 'L')
@@ -132,15 +135,42 @@ elseif strcmp(hand, 'L')
 end
 
 if numel(played_notes) ~= numel(correct_notes)
-    fprintf("*** WRONG NUMBER OF NOTES PLAYED: %d INSTEAD OF %d ***",  numel(played_notes), numel(correct_notes))
+    err = true;
+    err_type = "err_num_notes"
+    fprintf("*** WRONG NUMBER OF NOTES PLAYED: %d INSTEAD OF %d ***\n",  ...
+            numel(played_notes), numel(correct_notes))
+
+elseif played_notes ~= correct_notes
+    err = true;
+    err_type = "err_wrong_notes"
+
+    fprintf("***\n WRONG NOTES PLAYED! ***\n")
+
+    other_hand_notes = ~ismember(played_notes, correct_notes)
+    if any(other_hand_notes)
+    err_type = "err_wrong_hand"
+    fprintf("*** NOTES PLAYED with wrong hand! ***\n")
+    end
 end
 
-if played_notes ~= correct_notes
-    fprintf("*** WRONG NOTES PLAYED: []")
+if err
+    % switch err_type
+    %   case 'err_wrong_notes'
+    %      error_message = imread('err_num_notes.JPG');
+    %   case 'err_wrong_notes'
+    %      error_message = imread('err_wrong_notes.JPG');
+    %   case 'err_wrong_notes'
+    %      error_message = imread('err_wrong_hand.JPG');
+    % end
+    %      display_image(error_message, window);
+    %      waitForTimeOrEsc(instruction_time, true, start_tic);
+
+    fprintf("***\n Played notes: [")
     fprintf('%g ', played_notes);
+    fprintf('] instead of [')
+    fprintf('%g ', correct_notes);
     fprintf('] ***\n');
 end
-
 
 
 end
