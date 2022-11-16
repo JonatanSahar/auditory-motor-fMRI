@@ -36,13 +36,11 @@ INVALID_RUN_NUM = 0;
 
 num_runs = 3; % should be 3
 
-num_runs_motor_localizer = 1;
 num_blocks_fam = 4;
 num_blocks = 20; % should be 20, must be multiple of 4.
 
 if demo_run % override values for a shorter run
     num_runs = 1; 
-    num_runs_motor_localizer = 1;
     num_blocks_fam = 4;
     num_blocks = 4; 
 end
