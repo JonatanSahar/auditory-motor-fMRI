@@ -31,6 +31,7 @@ end
     % KbWait;
     % WaitSecs(0.5);
     waitForMRI()
+    RestrictKeysForKbCheck(['ESCAPE'])
     start_tic = tic;
     err_counter = 0;
 
@@ -73,6 +74,9 @@ end
          playSequence(ear);
          duration = toc(start_tic);
     end
+
+
+    RestrictKeysForKbCheck([])
 
         data_table = updateTable(data_table, num_blocks, i_run, i_block, ear, hand, start_time, duration);
 

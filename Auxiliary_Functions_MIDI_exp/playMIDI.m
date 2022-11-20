@@ -64,7 +64,7 @@ try
             msg = msgs(i);
             if isNoteOn(msg) % if note pressed
                 % convert left hand notes to be similar to right hand's
-                err_detect_vec(note_ctr) = msg.note;
+                err_detect_vec(note_ctr) = msg.Note;
                 msg.Note = convertHand(msg.Note);
                 % synthesize an audio signal
                 osc.Frequency = note2Freq(msg.Note);
