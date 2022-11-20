@@ -32,6 +32,7 @@ end
     % WaitSecs(0.5);
     waitForMRI()
     start_tic = tic;
+    err_counter = 0;
 
     for i_block = 1:num_blocks
         % get the start time of next block
@@ -57,7 +58,7 @@ end
         display_image(block_instruction, window);
 
         if contains(run_type, 'motor') % for the motor localizer, and the audiomotor runs
-            [start_time, duration, notes_vec, timestamp_vec] = playMIDI(device, ...
+            [start_time, duration, notes_vec, timestamp_vec, err] = playMIDI(device, ...
                                                                         num_notes, ...
                                                                         i_block, ...
                                                                         ear, ...
@@ -65,6 +66,8 @@ end
                                                                         false, ...
                                                                         end_of_block_time, ...
                                                                         start_tic);
+            if err
+                err_counter = err_counter + 1;
     else
          start_time = toc(start_tic);
          playSequence(ear);
@@ -84,4 +87,8 @@ end
          fixation = imread('fixation.JPG');
          display_image(fixation, window);
          waitForTimeOrEsc(instruction_time, true, start_tic);
+
+         if err_counter > 0
+             fprintf("*** This run contained %d playing errors ***\n", err_counter)
+         end
 end

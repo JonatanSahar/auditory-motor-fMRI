@@ -29,7 +29,7 @@ KbName('UnifyKeyNames');
 %% Define Parameters
 skip_to_experiment = 0;
 use_virtual_midi = 1;
-demo_run = 1;
+demo_run = 0;
 
 
 INVALID_RUN_NUM = 0;
