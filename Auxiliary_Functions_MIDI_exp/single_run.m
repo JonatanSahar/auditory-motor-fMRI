@@ -69,6 +69,7 @@ end
                                                                         start_tic);
             if err
                 err_counter = err_counter + 1;
+            end
     else
          start_time = toc(start_tic);
          playSequence(ear);
