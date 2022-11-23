@@ -43,14 +43,6 @@ try
     %     receive midi input for num_notes
     note_ctr = 1;
     while (note_ctr <= num_notes) && ((toc((start_of_run_tic))) <= end_of_block_time)
-        % if((toc((start_of_run_tic))) >= end_of_block_time)
-        %     fprintf('************\nTime exceeded!\n************\n')
-
-        %     release(osc);
-        %     release(dev_writer);
-
-        %     throw(MException('MATLAB:badMojo','time exceeded'));
-        % else
             [keyIsDown, keyTime, keyCode] = KbCheck;
             if keyCode(KbName('ESCAPE'))
                 fprintf('************\nEscape called!\n************\n')
@@ -125,7 +117,7 @@ duration = duration_of_playing;
 
 % detect errors in block
 played_notes = nonzeros(err_detect_vec)';
-err = false;
+err = 0;
 err_type = "none";
 if strcmp(hand, 'R')
     correct_notes = correct_notes_R;
@@ -136,13 +128,13 @@ elseif strcmp(hand, 'L')
 end
 
 if numel(played_notes) ~= numel(correct_notes)
-    err = true;
+    err = 1;
     err_type = "err_num_notes";
     fprintf("*** WRONG NUMBER OF NOTES PLAYED: %d INSTEAD OF %d ***\n",  ...
             numel(played_notes), numel(correct_notes))
 
 elseif played_notes ~= correct_notes
-    err = true;
+    err = 1;
     err_type = "err_wrong_notes";
 
     fprintf("*** WRONG NOTES PLAYED! ***\n")
@@ -155,17 +147,6 @@ elseif played_notes ~= correct_notes
 end
 
 if err
-    % switch err_type
-    %   case 'err_wrong_notes'
-    %      error_message = imread('err_num_notes.JPG');
-    %   case 'err_wrong_notes'
-    %      error_message = imread('err_wrong_notes.JPG');
-    %   case 'err_wrong_notes'
-    %      error_message = imread('err_wrong_hand.JPG');
-    % end
-    %      display_image(error_message, window);
-    %      waitForTimeOrEsc(instruction_time, true, start_tic);
-
     fprintf("*** Played notes: [")
     fprintf('%g ', played_notes);
     fprintf('] instead of [')

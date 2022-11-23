@@ -1,30 +1,27 @@
-﻿,Experiment timing,,
-,time (sec),time (minuets),
-instruction_display_duration,2,,
-block_duration ,8,,
-rest_duration (fixation),8,,
-,,,
-,,,
-num_runs localizers,2,,
-num_runs experiment,4,,
-num blocks per run,20,,
-,,,
-,,,
-block length,18,,
-run length,368,actually,386.00
-total  ,2208,36.80,
-,,,
-,,,
-familiarity phase ,,,
-instruction_display_duration,2,,
-block_duration ,8,,
-rest_duration (fixation),3,,
-,,,
-num_runs ,1,,
-num blocks per run ,4,,
-,,,
-block length,13,,
-run length ,55,actually ,73
-total familiarity part ,55,0.92,
-,,,
-total experiment part,2263,37.72,
+﻿,Experiment timing
+,time (sec)
+instruction_display_duration,2
+block_duration ,8
+rest_duration (fixation),8
+,
+,
+num_runs localizers,2
+num_runs experiment,4
+num blocks per run,20
+,
+,
+block length,18
+run length,368
+,
+,
+,
+familiarity phase ,
+instruction_display_duration,2
+block_duration ,8
+rest_duration (fixation),3
+,
+num_runs ,1
+num blocks per run ,4
+,
+block length,13
+run length ,55

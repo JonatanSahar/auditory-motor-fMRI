@@ -63,9 +63,10 @@ cycle_time_fam = block_and_rest_duration_fam + instruction_display_duration; %
 table_lines_per_block = num_runs + 1; % runs + fam
 
 % start times of blocks, starting with a rest period
+% the instruction_display_time is always the time the fixation break ends on
 instruction_display_times = [rest_duration : ...
                              cycle_time : ...
-                             cycle_time * (num_blocks + 1)]; % +1 because we need to wait one last fixation/washout after the last block, and the wait is always untill the next instruction
+                             cycle_time * (num_blocks + 1)]; % +1 because we need to wait one last fixation/washout after the last block, and the wait is always until the next instruction
 
 block_start_times = instruction_display_times + instruction_display_duration;
 block_end_times = block_start_times + block_duration;
@@ -160,8 +161,6 @@ auditory_only_conditions = repmat(condition_pairs, num_blocks/length(condition_p
 % initialize screen
 % HideCursor // TODO: restore
 [window, rect] = init_screen(false);
-win_hight = rect(4) - rect(2);
-win_width = rect(3) - rect(1);
 
 global small_window
 [small_window, rect] = init_screen(true);
@@ -248,7 +247,7 @@ for i_run = 1:num_runs
 end
 
 catch E
-    rethrow(E)
+    % rethrow(E)
 end
 
 %% Export Tables to Excel and Disconnect MIDI
