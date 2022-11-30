@@ -39,10 +39,11 @@ err_detect_vec = zeros(num_notes * 2, 1);
 notes_vec = zeros(num_notes * 2, 1);
 timestamp_vec = zeros(num_notes * 2, 1);
 
-try
-    %     receive midi input for num_notes
+try % a single block
+    %  receive midi input for num_notes
     note_ctr = 1;
     while (note_ctr <= num_notes) && ((toc((start_of_run_tic))) <= end_of_block_time)
+
             [keyIsDown, keyTime, keyCode] = KbCheck;
             if keyCode(KbName('ESCAPE'))
                 fprintf('************\nEscape called!\n************\n')
@@ -104,6 +105,11 @@ try
 
 catch E
     caught = 1;
+    clear sound
+
+    % release objects
+    release(osc);
+    release(dev_writer);
     rethrow(E)
 end % try/catch
 
@@ -141,8 +147,8 @@ elseif played_notes ~= correct_notes
 
     notes_from_other_hand = ismember(played_notes, other_hand_notes);
     if any(notes_from_other_hand)
-    err_type = "err_wrong_hand";
-    fprintf("*** NOTES PLAYED with wrong hand! ***\n")
+        err_type = "err_wrong_hand";
+        fprintf("*** NOTES PLAYED with wrong hand! ***\n")
     end
 end
 
@@ -152,6 +158,8 @@ if err
     fprintf('] instead of [')
     fprintf('%g ', correct_notes);
     fprintf('] ***\n');
+else
+    fprintf("*** All notes were played correctly :) ***\n")
 end
 
 
