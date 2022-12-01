@@ -188,7 +188,7 @@ while true
 
             [motor_only_pre_table, motor_only_pre_table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'motor_only_pre', int2str(i_run_mot));
 
-            [motor_only_pre_table, x] = single_run(window, ...
+            [motor_only_pre_table, x, shuffled_conditions] = single_run(window, ...
                                                    device,...
                                                    midi_table, ...
                                                    motor_only_pre_table,...
@@ -202,6 +202,12 @@ while true
 
             WaitSecs(0.5);
             writetable(motor_only_pre_table, fullfile(excel_path, motor_only_pre_table_filename));
+            % create an event file with all events to be separated later.
+            % 5 columns: time, duration, weight ear, hand.
+            % tab delimited.  1 = L, 2 = R
+            event_mat = [block_start_times(1:end-1)'  zeros(1,num_blocks)' + block_duration  zeros(1,num_blocks)' + 1 shuffled_conditions]
+            save("events_auditor_loc.mat", "event_mat");
+
             i_run_mot = i_run_mot + 1;
 
           case 'al'
@@ -211,7 +217,7 @@ while true
                 createTable(num_blocks, 1, parameters, var_types, ...
                             subject_number, 'auditory_only', int2str(i_run_aud));
 
-            [auditory_only_table, x] =  single_run(window, ...
+            [auditory_only_table, x, shuffled_conditions] =  single_run(window, ...
                                                    device, ...
                                                    midi_table, ...
                                                    auditory_only_table, ...
@@ -224,8 +230,16 @@ while true
                                                    INVALID_RUN_NUM, 'auditory_loc' );
 
             WaitSecs(0.5);
-            writetable(auditory_only_table, fullfile(excel_path, auditory_only_table_filename));
-            i_run_aud = i_run_aud + 1;
+            writetable(auditory_only_table, fullfile(excel_path, ...
+                                                     auditory_only_table_filename));
+
+            % create an event file with all events to be separated later.
+            % 5 columns: time, duration, weight ear, hand.
+            % tab delimited.  1 = L, 2 = R
+            event_mat = [block_start_times(1:end-1)'  zeros(1,num_blocks)' + block_duration  zeros(1,num_blocks)' + 1 shuffled_conditions]
+            save("events_auditor_loc.mat", "event_mat");
+
+i_run_aud = i_run_aud + 1;
 
           case 'sc'
             fprintf("Running a short sound check\n")
@@ -299,7 +313,7 @@ while true
 
             i_run = i_run + 1;
 
-            [auditory_motor_table, midi_table] = ...
+            [auditory_motor_table, midi_table, shuffled_conditions] = ...
                 single_run(window, ...
                            device, ...
                            midi_table, ...
@@ -315,8 +329,15 @@ while true
 
             WaitSecs(0.5);
 
-            writetable(auditory_motor_table, fullfile(excel_path, auditory_motor_table_filename));
+            writetable(auditory_motor_table, fullfile(excel_path, ...
+                                                      auditory_motor_table_filename));
             writetable(midi_table, fullfile(excel_path, midi_table_filename));
+
+            % create an event file with all events to be separated later.
+            % 5 columns: time, duration, weight ear, hand.
+            % tab delimited.  1 = L, 2 = R
+            event_mat = [block_start_times(1:end-1)'  zeros(1,num_blocks)' + block_duration  zeros(1,num_blocks)' + 1 shuffled_conditions]
+            save("events_auditor_loc.mat", "event_mat");
 
           case 'q'
             break
