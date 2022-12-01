@@ -3,9 +3,6 @@ function waitForTimeOrEsc(timeToWait, bAbsoluteTime, startTic)
 % If only the time interaval to wait is given - it waits for the specified time.
 % If bAbsoluteTime is specified, it waits for the remainig duration between startTic and the specified time.
 %
-    errID = 'myException:ESC';
-    msg = 'ESC called';
-    e = MException(errID,msg);
     if ~exist('bAbsoluteTime','var') || bAbsoluteTime ~= true
         startTic = tic;
     % else fprintf("time left in run %f secs\n", timeToWait)
@@ -19,8 +16,7 @@ function waitForTimeOrEsc(timeToWait, bAbsoluteTime, startTic)
         else
             [ keyIsDown, keyTime, keyCode ] = KbCheck;
             if keyCode(KbName('ESCAPE'))
-                Screen('CloseAll');                
-                throw(e);
+                throw(MException('MATLAB:badMojo','ESC called'));
             end
         end
     end
