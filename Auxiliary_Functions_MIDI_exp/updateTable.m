@@ -1,6 +1,5 @@
 % update data table with block number, notes pressed and timestamps
 function data_table = updateTable(data_table, num_blocks, i_run, i_block, ear, hand, start_time, duration)
-if i_run ~= 0
     curr_row = (i_run - 1) * num_blocks + i_block;
     
     data_table.run_num(curr_row) = i_run;
@@ -9,5 +8,4 @@ if i_run ~= 0
     data_table.play_duration(curr_row) = duration;
     data_table.ear(curr_row) = ear;
     data_table.hand(curr_row) = hand;
-end
 end

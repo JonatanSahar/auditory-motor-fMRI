@@ -12,7 +12,6 @@ function [data_table, midi_data_table, shuffled_conditions] = single_run(window,
                                                     run_type)
 
 try
-
     msgs = midireceive(midi_device); % flush the midi messages buffer
 
     % get the ear for this run - each run has audio to a constant ear, with hands changing between blocks
@@ -41,7 +40,6 @@ try
         % KbWait;
         % WaitSecs(0.5);
         waitForMRI()
-        previousKeys = RestrictKeysForKbCheck(['ESCAPE']);
         start_tic = tic;
         err_counter = 0;
 
@@ -54,7 +52,6 @@ try
             waitForTimeOrEsc(instruction_time, true, start_tic);
 
         for i_block = 1:num_blocks
-
             start_of_block_time = block_start_times(i_block);
             end_of_block_time = block_end_times(i_block);
             [ear, hand] = get_condition_for_block(shuffled_conditions, i_block);
@@ -73,30 +70,33 @@ try
             % start the actual run
             if contains(run_type, 'motor')
                 % for the motor localizer, and the audiomotor runs
-                [start_time, duration, notes_vec, timestamp_vec, err] = playMIDI(midi_device, ...
-                                                                                num_notes, ...
-                                                                                i_block, ...
-                                                                                ear, ...
-                                                                                hand, ...
-                                                                                false, ...
-                                                                                end_of_block_time, ...
-                                                                                start_tic);
-                err_counter = err_counter + 1;
+                [start_time, duration, notes_vec, timestamp_vec, err] = ...
+                    playMIDI(midi_device, ...
+                    num_notes, ...
+                    i_block, ...
+                    ear, ...
+                    hand, ...
+                    false, ...
+                    end_of_block_time, ...
+                    start_tic);
+                data_table = updateTable(data_table, num_blocks, i_run, i_block, ear, hand, start_time, duration);
+                
+                if strcmp(run_type, 'audiomotor')
+                    midi_data_table = updateMidiTable(midi_data_table, i_run, i_block, notes_vec, timestamp_vec);
+                end
+                
+                err_counter = err_counter + err;
+
             else
                 % for the auditory localizer
                 start_time = toc(start_tic);
                 playSequence(ear);
                 duration = toc(start_tic);
+                data_table = updateTable(data_table, num_blocks, i_run, i_block, ear, hand, start_time, duration);
+
             end
+            
 
-
-            RestrictKeysForKbCheck([previousKeys]); % restore previously enabled keys
-
-            data_table = updateTable(data_table, num_blocks, i_run, i_block, ear, hand, start_time, duration);
-
-            if strcmp(run_type, 'audiomotor')
-                midi_data_table = updateMidiTable(midi_data_table, i_run, i_block, notes_vec, timestamp_vec);
-            end
 
             % wait for remainder of time in block if needed.
             waitForTimeOrEsc(end_of_block_time, true, start_tic);
@@ -114,6 +114,7 @@ try
             end
 
             save(temp_filename, "data_table")
-catch
-end
-end
+catch E
+    rethrow(E)
+end % try/catch
+end % function

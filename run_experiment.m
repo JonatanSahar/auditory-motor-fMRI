@@ -25,24 +25,23 @@ Screen('Preference', 'VisualDebugLevel', 3); % skip PTB's intro screen
 Screen('Preference', 'SkipSyncTests', 2);
 % Unify keyboard names across software platforms
 KbName('UnifyKeyNames');
+        previousKeys = RestrictKeysForKbCheck(['ESCAPE']);
 
 %% Define Parameters
-skip_to_experiment = 0;
 use_virtual_midi = 1;
 demo_run = 1;
 
 
 INVALID_RUN_NUM = 0;
 
-num_runs = 3; % should be 3
+num_runs = 4; % should be 3
 
 num_blocks_short = 4;
 num_blocks = 20; % should be 20, must be multiple of 4.
 
 if demo_run % override values for a shorter run
     num_runs = 1; 
-    num_blocks_short = 4;
-    num_blocks = 4; 
+    num_blocks = 4;
 end
 
 assert(mod(num_blocks, 4) == 0);
@@ -51,8 +50,6 @@ num_seqs_in_block = 2;
 num_notes = seq_length * num_seqs_in_block;
 
 instruction_display_duration = 2; % in seconds
-
-
 block_duration = 8; %8 in seconds
 rest_duration = 8; %8 in seconds, between blocks
 rest_duration_short = 3; % in seconds, between blocks
@@ -94,7 +91,7 @@ else
 end
 
 
-%% Initialize Data Tables
+%% Initialize Data Table parameters
 % wanted parameters
 parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'ear',    'hand'};
 var_types =  {'double',  'double',    'double',     'double',       'string',  'string'};
@@ -147,12 +144,10 @@ assert(mod(num_blocks, length(condition_pairs)) == 0);
 auditory_only_conditions = repmat(condition_pairs, num_blocks/length(condition_pairs), 1);
 
 
-% initialize screen
-% HideCursor // TODO: restore
-[window, rect] = init_screen(false);
-
+% screen initialize
 global small_window
 small_window = [];
+[window, rect] = init_screen(false);
 % [small_window, rect] = init_screen(true);
 
 % init run numbers for filenames
@@ -160,16 +155,12 @@ i_run = 1;
 i_run_mot = 1;
 i_run_aud = 1;
 
-excel_path = fullfile(pwd, 'output_data');
+output_dir = fullfile(pwd, 'output_data');
 
 % init a dummy midi table
 midi_table = [];
 
 while true
-
-    % command = input('Which part would you like to run next? \nMOT - motor localizer \nAUD - auditory localizer \nSHORT - a short run with 4 blocks \nSOUND - a short sound check \nRUN - and experimental run\nQ - quit\n\n', 's');
-    %
-
     str = sprintf('%s\n',...
                 "Which part would you like to run next?", ...
                 "ml - motor localizer", ...
@@ -186,7 +177,7 @@ while true
           case 'ml'
             fprintf("Running a motor localizer\n")
 
-            [motor_only_pre_table, motor_only_pre_table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'motor_only_pre', int2str(i_run_mot));
+            [motor_only_pre_table, motor_only_pre_table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'motor_localizer_', int2str(i_run_mot));
 
             [motor_only_pre_table, x, shuffled_conditions] = single_run(window, ...
                                                    device,...
@@ -198,46 +189,46 @@ while true
                                                    instruction_display_times, ...
                                                    block_start_times, ...
                                                    block_end_times,...
-                                                   INVALID_RUN_NUM, 'motor_loc' );
+                                                   1, 'motor_loc' );
 
             WaitSecs(0.5);
-            writetable(motor_only_pre_table, fullfile(excel_path, motor_only_pre_table_filename));
+            writetable(motor_only_pre_table, fullfile(output_dir, motor_only_pre_table_filenamesca));
             % create an event file with all events to be separated later.
             % 5 columns: time, duration, weight ear, hand.
             % tab delimited.  1 = L, 2 = R
             event_mat = [block_start_times(1:end-1)'  zeros(1,num_blocks)' + block_duration  zeros(1,num_blocks)' + 1 shuffled_conditions]
-            save("events_auditor_loc.mat", "event_mat");
+            save(fullfile(output_dir, "events_motor_loc.mat"), "event_mat");
 
             i_run_mot = i_run_mot + 1;
 
           case 'al'
             fprintf("Running a auditory localizer\n")
 
-            [auditory_only_table, auditory_only_table_filename] = ...
+            [auditory_localizer_table, auditory_localizer_table_filename] = ...
                 createTable(num_blocks, 1, parameters, var_types, ...
-                            subject_number, 'auditory_only', int2str(i_run_aud));
+                            subject_number, 'auditory_localizer_', int2str(i_run_aud));
 
-            [auditory_only_table, x, shuffled_conditions] =  single_run(window, ...
+            [auditory_localizer_table, x, shuffled_conditions] =  single_run(window, ...
                                                    device, ...
                                                    midi_table, ...
-                                                   auditory_only_table, ...
+                                                   auditory_localizer_table, ...
                                                    auditory_only_conditions, ...
                                                    num_notes, ...
                                                    num_blocks,...
                                                    instruction_display_times, ...
                                                    block_start_times, ...
                                                    block_end_times, ...
-                                                   INVALID_RUN_NUM, 'auditory_loc' );
+                                                   1, 'auditory_loc' );
 
             WaitSecs(0.5);
-            writetable(auditory_only_table, fullfile(excel_path, ...
-                                                     auditory_only_table_filename));
+            writetable(auditory_localizer_table, fullfile(output_dir, ...
+                                                     auditory_localizer_table_filename));
 
             % create an event file with all events to be separated later.
             % 5 columns: time, duration, weight ear, hand.
             % tab delimited.  1 = L, 2 = R
             event_mat = [block_start_times(1:end-1)'  zeros(1,num_blocks)' + block_duration  zeros(1,num_blocks)' + 1 shuffled_conditions]
-            save("events_auditor_loc.mat", "event_mat");
+            save(fullfile(output_dir, "events_auditory_loc.mat"), "event_mat");
 
 i_run_aud = i_run_aud + 1;
 
@@ -251,8 +242,8 @@ i_run_aud = i_run_aud + 1;
 
           case 'sr'
             fprintf("Running a short run (4 blocks)\n")
-
-            [auditory_motor_table, auditory_motor_table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'auditory_motor', "short");
+            [auditory_motor_table, filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'auditory_motor_short',  int2str(i_run));
+            [midi_table, midi_table_filename] = createMidiTable(num_runs, num_blocks, num_notes, midi_parameters, midi_var_types, subject_number, 'midi_short', int2str(i_run));
 
             single_run(window, ...
                        device, ...
@@ -264,11 +255,14 @@ i_run_aud = i_run_aud + 1;
                        instruction_display_times_short, ...
                        block_start_times_short, ...
                        block_end_times_short, ...
-                       INVALID_RUN_NUM, ... % = familiraity run
+                       1, ... % = familiraity run
                        'audiomotor');
 
-            WaitSecs(0.5);
+                   writetable(auditory_motor_table, fullfile(output_dir, ...
+                                                      filename));
 
+            WaitSecs(0.5);
+            continue
           case 'r'
 
             [auditory_motor_table, auditory_motor_table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'auditory_motor', int2str(i_run));
@@ -329,22 +323,22 @@ i_run_aud = i_run_aud + 1;
 
             WaitSecs(0.5);
 
-            writetable(auditory_motor_table, fullfile(excel_path, ...
+            writetable(auditory_motor_table, fullfile(output_dir, ...
                                                       auditory_motor_table_filename));
-            writetable(midi_table, fullfile(excel_path, midi_table_filename));
+            writetable(midi_table, fullfile(output_dir, midi_table_filename));
 
             % create an event file with all events to be separated later.
             % 5 columns: time, duration, weight ear, hand.
             % tab delimited.  1 = L, 2 = R
             event_mat = [block_start_times(1:end-1)'  zeros(1,num_blocks)' + block_duration  zeros(1,num_blocks)' + 1 shuffled_conditions]
-            save("events_auditor_loc.mat", "event_mat");
+            save(fullfile(output_dir, "events_audiomotor_loc.mat"), "event_mat");
 
           case 'q'
             break
 
           case 'i'
-            % init_screen(true) % small window
-            init_screen(false)
+            init_screen(true) % small window
+            % init_screen(false)
         end % end switch-case
 
     catch E

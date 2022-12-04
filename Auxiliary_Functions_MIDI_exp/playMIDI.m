@@ -9,6 +9,8 @@ function [start_time, duration, notes_vec, timestamp_vec, err] = playMIDI( ...
     end_of_block_time,...
     start_of_run_tic)
 
+    fprintf("Play!\n");
+
 caught = 0;
 if ~exist('bMute','var')
     mute was not specified, default it to 0
@@ -44,7 +46,6 @@ try % a single block
     note_ctr = 1;
     while (note_ctr <= num_notes) && ((toc((start_of_run_tic))) <= end_of_block_time)
 
-                fprintf('yonatan\n');
                 WaitSecs(2);
             [keyIsDown, keyTime, keyCode] = KbCheck;
             if keyCode(KbName('ESCAPE'))
