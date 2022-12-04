@@ -34,7 +34,7 @@ demo_run = 1;
 
 INVALID_RUN_NUM = 0;
 
-num_runs = 4; % should be 3
+num_runs = 4; % should be 4
 
 num_blocks_short = 4;
 num_blocks = 20; % should be 20, must be multiple of 4.
@@ -230,7 +230,7 @@ while true
             event_mat = [block_start_times(1:end-1)'  zeros(1,num_blocks)' + block_duration  zeros(1,num_blocks)' + 1 shuffled_conditions]
             save(fullfile(output_dir, "events_auditory_loc.mat"), "event_mat");
 
-i_run_aud = i_run_aud + 1;
+            i_run_aud = i_run_aud + 1;
 
           case 'sc'
             fprintf("Running a short sound check\n")
@@ -305,8 +305,6 @@ i_run_aud = i_run_aud + 1;
                 conditions = right_conditions;
             end
 
-            i_run = i_run + 1;
-
             [auditory_motor_table, midi_table, shuffled_conditions] = ...
                 single_run(window, ...
                            device, ...
@@ -332,6 +330,8 @@ i_run_aud = i_run_aud + 1;
             % tab delimited.  1 = L, 2 = R
             event_mat = [block_start_times(1:end-1)'  zeros(1,num_blocks)' + block_duration  zeros(1,num_blocks)' + 1 shuffled_conditions]
             save(fullfile(output_dir, "events_audiomotor_loc.mat"), "event_mat");
+
+            i_run = i_run + 1;
 
           case 'q'
             break

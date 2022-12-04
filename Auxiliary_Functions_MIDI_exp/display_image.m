@@ -1,6 +1,6 @@
 
 function display_image(image, window)
-bNoDisplay = 1;
+bNoDisplay = 0;
 if bNoDisplay
     return
 else 
