@@ -35,14 +35,8 @@ demo_run = 1;
 INVALID_RUN_NUM = 0;
 
 num_runs = 4; % should be 4
-
 num_blocks_short = 4;
 num_blocks = 20; % should be 20, must be multiple of 4.
-
-if demo_run % override values for a shorter run
-    num_runs = 1; 
-    num_blocks = 4;
-end
 
 assert(mod(num_blocks, 4) == 0);
 seq_length = 5;
@@ -58,6 +52,14 @@ cycle_time = block_and_rest_duration + instruction_display_duration; % block+was
 block_and_rest_duration_short = block_duration + rest_duration_short;
 cycle_time_short = block_and_rest_duration_short + instruction_display_duration; %
 table_lines_per_block = num_runs + 1; % runs + fam
+
+
+if demo_run % override values for a shorter run
+    num_runs = 1;
+    num_blocks = 4;
+    block_duration = 4; %8 in seconds
+    rest_duration = 4; %8 in seconds, between blocks
+end
 
 % start times of blocks, starting with a rest period
 % the instruction_display_time is always the time the fixation break ends on
@@ -93,8 +95,8 @@ end
 
 %% Initialize Data Table parameters
 % wanted parameters
-parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'ear',    'hand'};
-var_types =  {'double',  'double',    'double',     'double',       'string',  'string'};
+parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'ear',    'hand',   'error'};
+var_types =  {'double',  'double',    'double',     'double',       'string',  'string', 'string'};
 
 midi_parameters = {'run_num', 'block_num', 'time_stamp', 'note', 'is_on', 'ipi'};
 midi_var_types =  {'double',  'double',    'double',    'double', 'double', 'double'};
@@ -146,9 +148,8 @@ auditory_only_conditions = repmat(condition_pairs, num_blocks/length(condition_p
 
 % screen initialize
 global small_window
-small_window = [];
-[window, rect] = init_screen(false);
-% [small_window, rect] = init_screen(true);
+[window, rect] = init_screen('fullscreen');
+% [small_window, rect] = init_screen('small');
 
 % init run numbers for filenames
 i_run = 1;
@@ -177,7 +178,7 @@ while true
           case 'ml'
             fprintf("Running a motor localizer\n")
 
-            [motor_only_pre_table, motor_only_pre_table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'motor_localizer_', int2str(i_run_mot));
+            [motor_only_pre_table, motor_loc_table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'motor_loc_', int2str(i_run_mot));
 
             [motor_only_pre_table, x, shuffled_conditions] = single_run(window, ...
                                                    device,...
@@ -192,12 +193,14 @@ while true
                                                    1, 'motor_loc' );
 
             WaitSecs(0.5);
-            writetable(motor_only_pre_table, fullfile(output_dir, motor_only_pre_table_filenamesca));
+            writetable(motor_only_pre_table, fullfile(output_dir, motor_loc_table_filename));
             % create an event file with all events to be separated later.
             % 5 columns: time, duration, weight ear, hand.
             % tab delimited.  1 = L, 2 = R
             event_mat = [block_start_times(1:end-1)'  zeros(1,num_blocks)' + block_duration  zeros(1,num_blocks)' + 1 shuffled_conditions]
-            save(fullfile(output_dir, "events_motor_loc.mat"), "event_mat");
+
+            str = sprintf("%d_events_motor_loc_%d.mat", subject_number, i_run_mot);
+            save(fullfile(output_dir, str), "event_mat");
 
             i_run_mot = i_run_mot + 1;
 
@@ -206,7 +209,7 @@ while true
 
             [auditory_localizer_table, auditory_localizer_table_filename] = ...
                 createTable(num_blocks, 1, parameters, var_types, ...
-                            subject_number, 'auditory_localizer_', int2str(i_run_aud));
+                            subject_number, 'auditory_loc_', int2str(i_run_aud));
 
             [auditory_localizer_table, x, shuffled_conditions] =  single_run(window, ...
                                                    device, ...
@@ -228,7 +231,9 @@ while true
             % 5 columns: time, duration, weight ear, hand.
             % tab delimited.  1 = L, 2 = R
             event_mat = [block_start_times(1:end-1)'  zeros(1,num_blocks)' + block_duration  zeros(1,num_blocks)' + 1 shuffled_conditions]
-            save(fullfile(output_dir, "events_auditory_loc.mat"), "event_mat");
+
+            str = sprintf("%d_events_auditory_loc_%d.mat", subject_number, i_run_aud);
+            save(fullfile(output_dir,str), "event_mat");
 
             i_run_aud = i_run_aud + 1;
 
@@ -242,7 +247,7 @@ while true
 
           case 'sr'
             fprintf("Running a short run (4 blocks)\n")
-            [auditory_motor_table, filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'auditory_motor_short',  int2str(i_run));
+            [auditory_motor_table, filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'audiomotor_short',  int2str(i_run));
             [midi_table, midi_table_filename] = createMidiTable(num_runs, num_blocks, num_notes, midi_parameters, midi_var_types, subject_number, 'midi_short', int2str(i_run));
 
             single_run(window, ...
@@ -263,10 +268,10 @@ while true
 
             WaitSecs(0.5);
             continue
-          case 'r'
 
-            [auditory_motor_table, auditory_motor_table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'auditory_motor', int2str(i_run));
-            [midi_table, midi_table_filename] = createMidiTable(num_runs, num_blocks, num_notes, midi_parameters, midi_var_types, subject_number, 'midi', int2str(i_run));
+          case 'r'
+            [audiomotor_table, audiomotor_table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'audiomotor_', int2str(i_run));
+            [midi_table, midi_table_filename] = createMidiTable(num_runs, num_blocks, num_notes, midi_parameters, midi_var_types, subject_number, 'midi_', int2str(i_run));
 
             fprintf("Running a full experimental run (20 blocks)\n")
 
@@ -276,7 +281,7 @@ while true
                             parameters, ...
                             var_types, ...
                             subject_number, ...
-                            'auditory_motor', int2str(i_run));
+                            'audiomotor', int2str(i_run));
 
 
             if mod(i_run, 2);
@@ -329,7 +334,8 @@ while true
             % 5 columns: time, duration, weight ear, hand.
             % tab delimited.  1 = L, 2 = R
             event_mat = [block_start_times(1:end-1)'  zeros(1,num_blocks)' + block_duration  zeros(1,num_blocks)' + 1 shuffled_conditions]
-            save(fullfile(output_dir, "events_audiomotor_loc.mat"), "event_mat");
+            str = sprintf("%d_events_audiomotor_%d.mat", subject_number, i_run);
+            save(fullfile(output_dir, str), "event_mat");
 
             i_run = i_run + 1;
 
@@ -337,8 +343,8 @@ while true
             break
 
           case 'i'
-            init_screen(true) % small window
-            % init_screen(false)
+            init_screen('small') % small window
+            init_screen('fullscreen')
         end % end switch-case
 
     catch E
@@ -358,6 +364,7 @@ display_image(instruction, window);
 
 
 % wait for a key press in order to continue
+RestrictKeysForKbCheck([])
 fprintf("Press any key to continue\n");
 KbWait;
 WaitSecs(0.5);

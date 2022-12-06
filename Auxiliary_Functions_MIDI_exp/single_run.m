@@ -11,7 +11,7 @@ function [data_table, midi_data_table, shuffled_conditions] = single_run(window,
                                                     i_run,...
                                                     run_type)
 
-try
+% try
     msgs = midireceive(midi_device); % flush the midi messages buffer
 
     % get the ear for this run - each run has audio to a constant ear, with hands changing between blocks
@@ -79,13 +79,15 @@ try
                     false, ...
                     end_of_block_time, ...
                     start_tic);
-                data_table = updateTable(data_table, num_blocks, i_run, i_block, ear, hand, start_time, duration);
+                data_table = updateTable(data_table, num_blocks, i_run, i_block, ear, hand, start_time, duration, err);
                 
                 if strcmp(run_type, 'audiomotor')
                     midi_data_table = updateMidiTable(midi_data_table, i_run, i_block, notes_vec, timestamp_vec);
                 end
                 
-                err_counter = err_counter + err;
+                if err ~= 'none'
+                err_counter = err_counter + 1;
+                end
 
             else
                 % for the auditory localizer
@@ -114,7 +116,7 @@ try
             end
 
             save(temp_filename, "data_table")
-catch E
-    rethrow(E)
-end % try/catch
+% catch E
+%     rethrow(E)
+% end % try/catch
 end % function
