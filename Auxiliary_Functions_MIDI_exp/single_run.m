@@ -25,6 +25,11 @@ function [data_table, midi_data_table, shuffled_conditions] = single_run(window,
         temp_filename = "temp_" + run_type + ".mat";
         run_instruction = imread('auditory_localizer.JPG');
         block_instruction = imread('listen.JPG');
+    case 'audiomotor_short'
+        temp_filename = "temp_" + run_type + ".mat";
+        [ear, hand] = get_condition_for_block(conditions, 1);
+        run_instruction = imread(sprintf('audiomotor_%s_ear.JPG', ear));
+        block_instruction = imread('play.JPG');
     case 'audiomotor'
         temp_filename = "temp_" + run_type + ".mat";
         [ear, hand] = get_condition_for_block(conditions, 1);
