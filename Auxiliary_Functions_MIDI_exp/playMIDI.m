@@ -66,7 +66,7 @@ try % a single block
                 % synthesize an audio signal
                 osc.Frequency = note2Freq(msg.Note);
                 osc.Amplitude = msg.Velocity/127;
-
+                fprintf("starting note %d\n", msg.Note);
                 % update data table with note pressed and timestamp
                 if i_block ~= 0 && msg.Note ~= 0 % not familiarization phase
                     notes_vec(note_ctr * 2 - 1) = msg.Note;
@@ -80,17 +80,19 @@ try % a single block
                         timestamp_vec(note_ctr * 2) = toc(start_of_run_tic); %msg.Timestamp;
                     end
                     if msg.Note ~= 0
+                        fprintf("ending note %d\n", msg.Note)
                         if note_ctr == 1
                             time_of_first_note = toc(start_of_run_tic);
                         end
                         note_ctr = note_ctr + 1;
                     end
             end
-        end
 
         if bMute
             dev_writer(mute_waveform);
         else
+            fprintf("playing note\n")
+%             fprintf("%g\n", osc()')
             if strcmp(ear, 'R')
                 dev_writer([mute_waveform, osc()]);
             elseif strcmp(ear, 'L')
@@ -99,6 +101,8 @@ try % a single block
                 dev_writer(osc());
             end
         end
+        end
+
 
     end % while
 

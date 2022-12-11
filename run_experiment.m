@@ -28,7 +28,7 @@ KbName('UnifyKeyNames');
         previousKeys = RestrictKeysForKbCheck(['ESCAPE']);
 
 %% Define Parameters
-use_virtual_midi = 1;
+use_virtual_midi = 0;
 demo_run = 1;
 
 
@@ -51,7 +51,7 @@ rest_duration_short = 3; % in seconds, between blocks
 if demo_run % override values for a shorter run
     num_runs = 1;
     num_blocks = 4;
-    block_duration = 1; %8 in seconds
+    block_duration = 8; %8 in seconds
     rest_duration = 1; %8 in seconds, between blocks
 end
 
