@@ -57,6 +57,7 @@ try % a single block
         % end
 
         msgs = midireceive(midi_dev);
+        fprintf("%d\n", numel(msgs));
         for i = 1:numel(msgs)
             msg = msgs(i);
             if isNoteOn(msg) % if note pressed
@@ -87,6 +88,7 @@ try % a single block
                         note_ctr = note_ctr + 1;
                     end
             end
+        end
 
         if bMute
             dev_writer(mute_waveform);
@@ -100,7 +102,6 @@ try % a single block
             elseif strcmp(ear, 'both')
                 dev_writer(osc());
             end
-        end
         end
 
 
