@@ -25,12 +25,12 @@ Screen('Preference', 'VisualDebugLevel', 3); % skip PTB's intro screen
 Screen('Preference', 'SkipSyncTests', 2);
 % Unify keyboard names across software platforms
 KbName('UnifyKeyNames');
-        previousKeys = RestrictKeysForKbCheck(['ESCAPE']);
+previousKeys = RestrictKeysForKbCheck(['ESCAPE']);
 
 %% Define Parameters
 use_virtual_midi = 0;
 demo_run = 1;
-
+bNoDisplay = 0;
 
 INVALID_RUN_NUM = 0;
 
@@ -147,9 +147,11 @@ auditory_only_conditions = repmat(condition_pairs, num_blocks/length(condition_p
 
 
 % screen initialize
-global small_window
-[window, rect] = init_screen('fullscreen');
-% [small_window, rect] = init_screen('small');
+if ~bNoDisplay
+    global small_window
+    [window, rect] = init_screen('fullscreen');
+    % [small_window, rect] = init_screen('small');
+end
 
 % init run numbers for filenames
 i_run = 1;
@@ -206,11 +208,11 @@ while true
 
           case 'sc'
             fprintf("Running a short sound check\n")
-            playSequence('both');
+            playGenertedSequence('both');
             WaitSecs(0.5)
-            playSequence('R');
+            playGenertedSequence('R');
             WaitSecs(0.5)
-            playSequence('L');
+            playGenertedSequence('L');
 
             continue
 
@@ -329,3 +331,5 @@ fprintf("Press any key to continue\n");
 KbWait;
 WaitSecs(0.5);
 sca;
+
+% playMIDI(midi_dev, num_notes,  i_block,  ear,  hand,  bMute,  end_of_block_time, start_of_run_tic)
