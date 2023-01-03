@@ -1,11 +1,11 @@
 function playGeneratedSequence(ear)
+% ear must be: 'L' or 'R, or 'both
+
     [osc, dev_writer] = initializeAudioDevices();
     IPI = 0.9;
-    ear = 'L'
     note_duration = 0.5;
     num_repeats = 2;
     time_between_repeats = 0.5;
-%     loop sequence (messages) matrix
     WaitSecs(0.3);
     mute_waveform = audioOscillator('sine', 'Amplitude', 0);
     load('seq_mat.mat', 'seq_mat')

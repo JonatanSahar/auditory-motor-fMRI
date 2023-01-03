@@ -127,14 +127,7 @@ elseif strcmp(hand, 'L')
     other_hand_notes = correct_notes_R;
 end
 
-if numel(played_notes) ~= numel(correct_notes)
-    err = 1;
-    err_type = "err_num_notes";
-    fprintf("**************\n");
-    fprintf("WRONG NUMBER OF NOTES PLAYED: %d INSTEAD OF %d \n",  ...
-            numel(played_notes), numel(correct_notes))
-
-elseif played_notes ~= correct_notes
+if ~isequal(played_notes, correct_notes)
     err = 1;
     err_type = "err_wrong_notes";
 
@@ -144,7 +137,7 @@ elseif played_notes ~= correct_notes
     notes_from_other_hand = ismember(played_notes, other_hand_notes);
     if any(notes_from_other_hand)
         err_type = "err_wrong_hand";
-        fprintf("NOTES PLAYED with wrong hand! \n")
+        fprintf("notes played with wrong hand! \n")
     end
 end
 
@@ -154,10 +147,12 @@ if err
     fprintf('] instead of [')
     fprintf('%g ', correct_notes);
     fprintf(']\n');
+    fprintf("number of notes played: %d instead of %d \n",  ...
+            numel(played_notes), numel(correct_notes))
     fprintf("**************\n\n");
 else
     fprintf("*** All notes were played correctly :) ***\n\n")
-    err_type = 'none'
+    err_type = 'none';
 end
 
 

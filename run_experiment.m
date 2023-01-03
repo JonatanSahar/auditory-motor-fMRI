@@ -208,11 +208,11 @@ while true
 
           case 'sc'
             fprintf("Running a short sound check\n")
-            playGenertedSequence('both');
+            playGeneratedSequence('both');
             WaitSecs(0.5)
-            playGenertedSequence('R');
+            playGeneratedSequence('R');
             WaitSecs(0.5)
-            playGenertedSequence('L');
+            playGeneratedSequence('L');
 
             continue
 
@@ -274,6 +274,10 @@ while true
             init_screen('small') % small window
             init_screen('fullscreen')
             continue
+
+          otherwise
+            continue
+
         end % end switch-case
 
     catch E
@@ -306,14 +310,16 @@ while true
             end
 
             % create an event file with all events to be separated later.
-            % 5 columns: time, duration, weight ear, hand.
+            % 5 columns: time, duration, weight, ear, hand.
             % tab delimited.  1 = L, 2 = R
             event_mat = [block_start_times(1:end-1)'...
                          zeros(1,num_blocks)' + block_duration ...
-                         zeros(1,num_blocks)' + 1 shuffled_conditions]
-
+                         zeros(1,num_blocks)' + 1 ...
+                         shuffled_conditions];
+            event_mat_header = ["time", "duration", "weight", "ear (1 = L, 2 = R)", "hand (1 = L, 2 = R)"];
             events_str = sprintf("%d_events_%s_%d.mat", subject_number, run_type, file_num);
             save(fullfile(output_dir, events_str), "event_mat");
+            save(fullfile(output_dir, "events_header.mat"), "event_mat_header");
 
 fprintf("******\n  Done!\n******\n\n")
 end % end while(true)
@@ -326,7 +332,7 @@ display_image(instruction, window);
 
 
 % wait for a key press in order to continue
-RestrictKeysForKbCheck([])
+RestrictKeysForKbCheck([]);
 fprintf("Press any key to continue\n");
 KbWait;
 WaitSecs(0.5);
