@@ -11,14 +11,13 @@ function [start_time, duration, notes_vec, timestamp_vec, err_type] = playMIDI( 
 
     fprintf("Play!\n");
 
-caught = 0;
 if ~exist('bMute','var')
-    mute was not specified, default it to 0
+    % mute was not specified, default it to 0
     bMute = 0;
 end     
 
 if ~exist('ear','var')
-    default to binaural playing
+    % default to binaural playing
     ear = 'both';
 end
 
@@ -43,21 +42,9 @@ timestamp_vec = zeros(num_notes * 2, 1);
 
 try % a single block
     %  receive midi input for num_notes
-    note_ctr = 1;
+   note_ctr = 1;
     while (note_ctr <= num_notes) && ((toc((start_of_run_tic))) <= end_of_block_time)
-
-                WaitSecs(2);
-            [keyIsDown, keyTime, keyCode] = KbCheck;
-            if keyCode(KbName('ESCAPE'))
-                % fprintf('\n********\nEscape called!\n********\n')
-                WaitSecs(0.2);
-                throw(MException('MATLAB:badMojo','ESC called'));
-
-            end
-        % end
-
         msgs = midireceive(midi_dev);
-        fprintf("%d\n", numel(msgs));
         for i = 1:numel(msgs)
             msg = msgs(i);
             if isNoteOn(msg) % if note pressed
@@ -67,34 +54,34 @@ try % a single block
                 % synthesize an audio signal
                 osc.Frequency = note2Freq(msg.Note);
                 osc.Amplitude = msg.Velocity/127;
-                fprintf("starting note %d\n", msg.Note);
                 % update data table with note pressed and timestamp
-                if i_block ~= 0 && msg.Note ~= 0 % not familiarization phase
+                if i_block ~= 0 && msg.Note ~= 0 %not familiarization phase
                     notes_vec(note_ctr * 2 - 1) = msg.Note;
-                    timestamp_vec(note_ctr * 2 - 1) = toc(start_of_run_tic); %msg.Timestamp;
+                    timestamp_vec(note_ctr * 2 - 1) = msg.Timestamp;
+                    if note_ctr == 1
+                        time_of_first_note = toc(start_of_run_tic);
+                    end
                 end
 
             elseif isNoteOff(msg)
+                if msg.Note == msg.Note
                     osc.Amplitude = 0;
-                    if i_block ~= 0 && msg.Note ~= 0 % not familiarization phase
+
+                     % update data table with note pressed and timestamp
+                    if i_block ~= 0 && msg.Note ~= 0 %not familiarization phase
                         notes_vec(note_ctr * 2) = msg.Note;
-                        timestamp_vec(note_ctr * 2) = toc(start_of_run_tic); %msg.Timestamp;
+                        timestamp_vec(note_ctr * 2 - 1) = toc(start_of_run_tic);
                     end
                     if msg.Note ~= 0
-                        fprintf("ending note %d\n", msg.Note)
-                        if note_ctr == 1
-                            time_of_first_note = toc(start_of_run_tic);
-                        end
                         note_ctr = note_ctr + 1;
                     end
+                end
             end
         end
 
         if bMute
             dev_writer(mute_waveform);
         else
-            fprintf("playing note\n")
-%             fprintf("%g\n", osc()')
             if strcmp(ear, 'R')
                 dev_writer([mute_waveform, osc()]);
             elseif strcmp(ear, 'L')
@@ -104,7 +91,6 @@ try % a single block
             end
         end
 
-
     end % while
 
     if ((toc((start_of_run_tic))) <= end_of_block_time) % we didn't exceed the time
@@ -113,7 +99,6 @@ try % a single block
     end
 
 catch E
-    caught = 1;
     clear sound
 
     % release objects

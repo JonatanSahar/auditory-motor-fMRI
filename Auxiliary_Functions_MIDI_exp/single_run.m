@@ -97,9 +97,9 @@ function [data_table, midi_data_table, shuffled_conditions] = single_run(window,
             else
                 % for the auditory localizer
                 start_time = toc(start_tic);
-                playSequence(ear);
+                playGeneratedSequence(ear);
                 duration = toc(start_tic);
-                data_table = updateTable(data_table, num_blocks, i_run, i_block, ear, hand, start_time, duration);
+                data_table = updateTable(data_table, num_blocks, i_run, i_block, ear, hand, start_time, duration, "none");
 
             end
             
