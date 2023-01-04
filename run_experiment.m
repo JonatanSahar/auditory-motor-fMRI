@@ -28,7 +28,7 @@ KbName('UnifyKeyNames');
 previousKeys = RestrictKeysForKbCheck(['ESCAPE']);
 
 %% Define Parameters
-use_virtual_midi = 0;
+use_virtual_midi = 1;
 demo_run = 1;
 bNoDisplay = 0;
 
@@ -180,7 +180,7 @@ while true
           case 'ml'
             fprintf("Running a motor localizer\n")
 
-            [table, table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'motor_loc_', int2str(i_run_mot));
+            [table, table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'motor_loc', int2str(i_run_mot));
 
             conditions = motor_only_conditions;
 
@@ -196,7 +196,7 @@ while true
 
             [table, table_filename] = ...
                 createTable(num_blocks, 1, parameters, var_types, ...
-                            subject_number, 'auditory_loc_', int2str(i_run_aud));
+                            subject_number, 'auditory_loc', int2str(i_run_aud));
 
             % knowing what we're going to run
             conditions = auditory_only_conditions;
@@ -219,7 +219,7 @@ while true
           case 'sr'
             fprintf("Running a short run (4 blocks)\n")
 
-            [table, table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'audiomotor_short_',  int2str(i_run));
+            [table, table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'audiomotor_short',  int2str(i_run));
 
             run_num = 1;
             file_num = 1;
@@ -229,7 +229,7 @@ while true
             
 
           case 'r'
-            [table, table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'audiomotor_', int2str(i_run));
+            [table, table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'audiomotor', int2str(i_run));
             [midi_table, midi_table_filename] = createMidiTable(num_runs, num_blocks, num_notes, midi_parameters, midi_var_types, subject_number, 'midi_', int2str(i_run));
 
             fprintf("Running a full experimental run (20 blocks)\n")
@@ -305,23 +305,34 @@ while true
 
             writetable(table, fullfile(output_dir, table_filename));
 
-            if strcmp(run_type,'audiomotor')
-                writetable(midi_table, fullfile(output_dir, midi_table_filename));
-            end
+            table.weight = ones(length(table.ear), 1)
 
-            % create an event file with all events to be separated later.
-            % 5 columns: time, duration, weight, ear, hand.
-            % tab delimited.  1 = L, 2 = R
-            event_mat = [block_start_times(1:end-1)'...
-                         zeros(1,num_blocks)' + block_duration ...
-                         zeros(1,num_blocks)' + 1 ...
-                         shuffled_conditions];
-            event_mat_header = ["time", "duration", "weight", "ear (1 = L, 2 = R)", "hand (1 = L, 2 = R)"];
-            events_str = sprintf("%d_events_%s_%d.mat", subject_number, run_type, file_num);
-            save(fullfile(output_dir, events_str), "event_mat");
-            save(fullfile(output_dir, "events_header.mat"), "event_mat_header");
 
-fprintf("******\n  Done!\n******\n\n")
+            % % create an event file with all events to be separated later.
+            % % 5 columns: time, duration, weight, ear, hand.
+            % % tab delimited.  1 = L, 2 = R
+            events_str = sprintf("%d_events_%s(%d)",...
+                                 subject_number,...
+                                 run_type,...
+                                 file_num);
+            events_filename = events_str + ".mat"
+
+    switch run_type
+    case 'motor_loc'
+            splitEventTable(table, 'hand', events_str, output_dir, ["start_time", "play_duration", "weight"]);
+    case 'auditory_loc'
+            splitEventTable(table, 'ear', events_str, output_dir,["start_time", "play_duration", "weight"] );
+    case 'audiomotor'
+            this_ear = table.ear(1);
+            events_str = sprintf("%s_%s_ear", events_str, this_ear); % in each run, the ear is kept constant
+            splitEventTable(table, 'hand', events_str, output_dir, ["start_time", "play_duration", "weight"]);
+            writetable(midi_table,...
+                       fullfile(output_dir, midi_table_filename));
+    end
+
+    clear table midi_data_table midi_table
+    fprintf("******\n  Done!\n******\n\n")
+
 end % end while(true)
 
 

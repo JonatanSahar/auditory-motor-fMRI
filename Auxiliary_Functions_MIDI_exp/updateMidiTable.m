@@ -4,7 +4,8 @@ if i_run ~= 0
     
     update_len = length(notes_vec); % must always be 2 * sequence length
     for i_note = 1 : update_len
-        curr_row = update_len * (i_run - 1 + i_block - 1) + i_note;
+        curr_row = update_len * (i_block - 1) + i_note;
+        % curr_row = update_len * (i_run - 1 + i_block - 1) + i_note;
         midi_data_table.run_num(curr_row) = i_run;
         midi_data_table.block_num(curr_row) = i_block;
         midi_data_table.time_stamp(curr_row) = timestamp_vec(i_note);
