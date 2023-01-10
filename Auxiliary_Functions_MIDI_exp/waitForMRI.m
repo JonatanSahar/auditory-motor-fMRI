@@ -1,6 +1,6 @@
 function waitForMRI()
     t_pressed = false;
-    previousKeys = RestrictKeysForKbCheck(['ESCAPE', KbName('t')]);
+    previousKeys = RestrictKeysForKbCheck([KbName('ESCAPE'), KbName('t')]);
     fprintf("waiting for next Tr cue from MRI...\n")
     while t_pressed == false
         [keyIsDown,secs, keyCode] = KbCheck;

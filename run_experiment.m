@@ -25,7 +25,7 @@ Screen('Preference', 'VisualDebugLevel', 3); % skip PTB's intro screen
 Screen('Preference', 'SkipSyncTests', 2);
 % Unify keyboard names across software platforms
 KbName('UnifyKeyNames');
-previousKeys = RestrictKeysForKbCheck(['ESCAPE']);
+previousKeys = RestrictKeysForKbCheck([KbName('ESCAPE')]);
 
 %% Define Parameters
 use_virtual_midi = 1;
@@ -87,9 +87,9 @@ subject_number = input('Please enter the subject''s number\n');
 
 % connect to midi device
 if use_virtual_midi
-    device = mididevice('LoopBe Internal MIDI');
+    midi_dev = mididevice('LoopBe Internal MIDI');
 else
-    device = mididevice('Teensy MIDI');
+    midi_dev = mididevice('Teensy MIDI');
 end
 
 
@@ -147,10 +147,11 @@ auditory_only_conditions = repmat(condition_pairs, num_blocks/length(condition_p
 
 
 % screen initialize
+window = 0;
 if ~bNoDisplay
     global small_window
     [window, rect] = init_screen('fullscreen');
-    % [small_window, rect] = init_screen('small');
+    [small_window, rect] = init_screen('small'); % uncomment in magent!
 end
 
 % init run numbers for filenames
@@ -164,6 +165,7 @@ output_dir = fullfile(pwd, 'output_data');
 midi_table = [];
 
 while true
+    midi_table = [];
     str = sprintf('%s\n',...
                 "Which part would you like to run next?", ...
                 "ml - motor localizer", ...
@@ -208,9 +210,13 @@ while true
 
           case 'sc'
             fprintf("Running a short sound check\n")
+            fprintf("both: (in 0.5s)\n")
+            WaitSecs(0.5)
             playGeneratedSequence('both');
+            fprintf("R: (in 0.5s)\n")
             WaitSecs(0.5)
             playGeneratedSequence('R');
+            fprintf("L: (in 0.5s)\n")
             WaitSecs(0.5)
             playGeneratedSequence('L');
 
@@ -225,8 +231,21 @@ while true
             file_num = 1;
             run_type = 'audiomotor_short';
             conditions = short_conditions;
+
+            playMIDI( ...
+                midi_dev,...
+                num_notes, ...
+                1, ...
+                'both', ...
+                'R', ...
+                false, ...
+                20,...
+                tic)
+
+
             WaitSecs(0.5);
-            
+
+            continue
 
           case 'r'
             [table, table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'audiomotor', int2str(i_run));
@@ -280,16 +299,10 @@ while true
 
         end % end switch-case
 
-    catch E
-        % rethrow(E)
-        msgText = getReport(E,'basic');
-        fprintf("Caught exception: %s\n", msgText)
-    end % end try/catch
-
     % run the actual run
             [table, midi_table, shuffled_conditions] = ...
                 single_run(window, ...
-                           device, ...
+                           midi_dev, ...
                            midi_table, ...
                            table, ...
                            conditions,...
@@ -305,7 +318,7 @@ while true
 
             writetable(table, fullfile(output_dir, table_filename));
 
-            table.weight = ones(length(table.ear), 1)
+            table.weight = ones(length(table.ear), 1);
 
 
             % % create an event file with all events to be separated later.
@@ -315,7 +328,7 @@ while true
                                  subject_number,...
                                  run_type,...
                                  file_num);
-            events_filename = events_str + ".mat"
+            events_filename = events_str + ".mat";
 
     switch run_type
     case 'motor_loc'
@@ -333,6 +346,12 @@ while true
     clear table midi_data_table midi_table
     fprintf("******\n  Done!\n******\n\n")
 
+
+    catch E
+        % rethrow(E)
+        msgText = getReport(E,'basic');
+        fprintf("Caught exception: %s\n", msgText)
+    end % end try/catch
 end % end while(true)
 
 

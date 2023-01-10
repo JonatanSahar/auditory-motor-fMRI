@@ -1,7 +1,7 @@
 
 function display_image(image, window)
 bNoDisplay = 0;
-bSmallDisplay = 0;
+bSmallDisplay = 1; % change to 1 in magent!
 if bNoDisplay
     return
 end

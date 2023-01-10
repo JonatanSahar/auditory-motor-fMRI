@@ -30,6 +30,7 @@ function [data_table, midi_data_table, shuffled_conditions] = single_run(window,
         [ear, hand] = get_condition_for_block(conditions, 1);
         run_instruction = imread(sprintf('audiomotor_%s_ear.JPG', ear));
         block_instruction = imread('play.JPG');
+        num_blocks = 1;
     case 'audiomotor'
         temp_filename = "temp" + "(" + run_type + ")" + ".mat";
         [ear, hand] = get_condition_for_block(conditions, 1);
@@ -41,6 +42,7 @@ function [data_table, midi_data_table, shuffled_conditions] = single_run(window,
         display_image(run_instruction, window);
         shuffled_conditions = conditions(randperm(length(conditions)), :);
 
+        try
         % wait for a key press in order to continue
         % KbWait;
         % WaitSecs(0.5);
@@ -121,7 +123,10 @@ function [data_table, midi_data_table, shuffled_conditions] = single_run(window,
             end
 
             save(temp_filename, "data_table")
-% catch E
-%     rethrow(E)
-% end % try/catch
+
+    catch E
+        % rethrow(E)
+        msgText = getReport(E,'basic');
+        fprintf("Caught exception: %s\n", msgText)
+        end % try-catch block
 end % function
