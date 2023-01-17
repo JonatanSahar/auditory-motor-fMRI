@@ -20,22 +20,22 @@ function [data_table, midi_data_table, shuffled_conditions] = single_run(window,
     case 'motor_loc'
         temp_filename = "temp" + "(" + run_type + ")" + ".mat";
         run_instruction = imread('motor_localizer.JPG');
-        block_instruction = imread('start.JPG');
+        block_instruction = imread('fixation_green.JPG');
     case 'auditory_loc'
         temp_filename = "temp" + "(" + run_type + ")" + ".mat";
         run_instruction = imread('auditory_localizer.JPG');
-        block_instruction = imread('listen.JPG');
+        block_instruction = imread('fixation_green.JPG');
     case 'audiomotor_short'
         temp_filename = "temp" + "(" + run_type + ")" + ".mat";
         [ear, hand] = get_condition_for_block(conditions, 1);
         run_instruction = imread(sprintf('audiomotor_%s_ear.JPG', ear));
-        block_instruction = imread('play.JPG');
+        block_instruction = imread('fixation_green.JPG');
         num_blocks = 1;
     case 'audiomotor'
         temp_filename = "temp" + "(" + run_type + ")" + ".mat";
         [ear, hand] = get_condition_for_block(conditions, 1);
         run_instruction = imread(sprintf('audiomotor_%s_ear.JPG', ear));
-        block_instruction = imread('play.JPG');
+        block_instruction = imread('fixation_green.JPG');
     end
 
         temp_filename = fullfile(base_path, temp_filename);
@@ -54,7 +54,7 @@ function [data_table, midi_data_table, shuffled_conditions] = single_run(window,
             instruction_time = instruction_display_times(1);
             [ear, hand] = get_condition_for_block(shuffled_conditions, 1);
 
-            fixation = imread('fixation.JPG');
+            fixation = imread('fixation_black.JPG');
             display_image(fixation, window);
             waitForTimeOrEsc(instruction_time, true, start_tic);
 
@@ -112,7 +112,7 @@ function [data_table, midi_data_table, shuffled_conditions] = single_run(window,
 
             % get the start time of next block, including the "false block" at the end, for the last fixation after the last block.
             instruction_time = instruction_display_times(i_block + 1);
-            fixation = imread('fixation.JPG');
+            fixation = imread('fixation_black.JPG');
             display_image(fixation, window);
             waitForTimeOrEsc(instruction_time, true, start_tic);
 
@@ -124,6 +124,8 @@ function [data_table, midi_data_table, shuffled_conditions] = single_run(window,
 
             save(temp_filename, "data_table")
 
+            break_img = imread('break.JPG');
+            display_image(break_img, window);
     catch E
         % rethrow(E)
         msgText = getReport(E,'basic');

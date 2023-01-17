@@ -1,16 +1,21 @@
 function playGeneratedSequence(ear)
 % ear must be: 'L' or 'R, or 'both
-
+    start = tic;
     [osc, dev_writer] = initializeAudioDevices();
-    IPI = 0.9;
-    note_duration = 0.5;
+    IPI = 0.45;
+    note_duration = 0.3;
     num_repeats = 2;
-    time_between_repeats = 0.5;
-    WaitSecs(0.3);
+    time_between_repeats = 0.3;
     mute_waveform = audioOscillator('sine', 'Amplitude', 0);
     load('seq_mat.mat', 'seq_mat')
+    WaitSecs(0.3);
+    isFirst = 1;
     for t = 1 : num_repeats
-        for i_msg = 1 : length(seq_mat)
+        seq_indices = 1 : length(seq_mat);
+        if t == 1
+            seq_indices = [1 seq_indices];
+        end
+        for i_msg = seq_indices
             curr_msg = seq_mat(i_msg);
             if isNoteOn(curr_msg)
                 osc.Frequency = note2Freq(curr_msg.Note);
@@ -22,15 +27,11 @@ function playGeneratedSequence(ear)
                 max_amplitude = 0.7;
                 accelaration = 0.8;
                 while toc(note_timing) < note_duration
-                    % if toc(note_timing) <= 0.5 * note_duration
-                    %     gain_factor = min(max_amplitude, accelaration * toc(note_timing)/note_duration);
-                    % elseif toc(note_timing) > 0.5 * note_duration
-                    %     gain_factor = min(max_amplitude, accelaration * (1 - toc(note_timing)/note_duration));
-                    % else
-                    %     gain_factor = 1;
-                    % end
-
                     gain_factor = 1;
+                    if isFirst
+                        isFirst = 0;
+                        gain_factor = 0;
+                    end
                     if strcmp(ear, 'R')
                         dev_writer([mute_waveform(), tone() * gain_factor]);
                     elseif strcmp(ear, 'L')
@@ -50,4 +51,5 @@ function playGeneratedSequence(ear)
     end
     release(osc);
     release(dev_writer);
+    toc(start)
 end

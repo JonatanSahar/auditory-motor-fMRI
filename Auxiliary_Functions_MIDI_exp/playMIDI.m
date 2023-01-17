@@ -41,7 +41,7 @@ notes_vec = zeros(num_notes * 2, 1);
 timestamp_vec = zeros(num_notes * 2, 1);
 
 try % a single block
-    %  receive midi input for num_notes
+
    note_ctr = 1;
     while (note_ctr <= num_notes) && ((toc((start_of_run_tic))) <= end_of_block_time)
         msgs = midireceive(midi_dev);
@@ -93,10 +93,8 @@ try % a single block
 
     end % while
 
-    if ((toc((start_of_run_tic))) <= end_of_block_time) % we didn't exceed the time
-        time_of_last_note = toc(start_of_run_tic);
-        duration_of_playing = time_of_last_note - time_of_first_note;
-    end
+    time_of_last_note = toc(start_of_run_tic);
+    duration_of_playing = time_of_last_note - time_of_first_note;
 
 catch E
     clear sound

@@ -25,8 +25,8 @@ function splitEventTable(T, affector, prefix, output_dir, fields_to_keep)
     save(fullfile(output_dir, file_name_L), "filtered_rows_L");
     save(fullfile(output_dir, file_name_R), "filtered_rows_R");
 
-    file_name_L = sprintf("%s_%s_%s.csv", prefix, "L", affector);
-    file_name_R = sprintf("%s_%s_%s.csv", prefix, "R", affector);
-    save(fullfile(output_dir, file_name_L), "filtered_rows_L");
-    save(fullfile(output_dir, file_name_R), "filtered_rows_R");
+    file_name_L_txt = sprintf("%s_%s_%s.txt", prefix, "L", affector);
+    file_name_R_txt = sprintf("%s_%s_%s.txt", prefix, "R", affector);
+    writetable(filtered_rows_L, fullfile(output_dir, file_name_L_txt), 'Delimiter','tab');
+    writetable(filtered_rows_R, fullfile(output_dir, file_name_R_txt), 'Delimiter','tab');
 end
