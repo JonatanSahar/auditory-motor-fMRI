@@ -29,7 +29,7 @@ previousKeys = RestrictKeysForKbCheck([KbName('ESCAPE')]);
 
 %% Define Parameters
 use_virtual_midi = 0;
-demo_run = 1;
+demo_run = 0;
 bNoDisplay = 0;
 
 INVALID_RUN_NUM = 0;
@@ -44,7 +44,7 @@ num_seqs_in_block = 2;
 num_notes = seq_length * num_seqs_in_block;
 
 instruction_display_duration = 2; % in seconds
-block_duration = 8; %8 in seconds
+block_duration = 9; %9 in seconds
 rest_duration = 8; %8 in seconds, between blocks
 rest_duration_short = 3; % in seconds, between blocks
 
