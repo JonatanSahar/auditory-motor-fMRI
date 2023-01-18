@@ -28,7 +28,7 @@ KbName('UnifyKeyNames');
 previousKeys = RestrictKeysForKbCheck([KbName('ESCAPE')]);
 
 %% Define Parameters
-use_virtual_midi = 0;
+use_virtual_midi = 1;
 demo_run = 0;
 bNoDisplay = 0;
 
@@ -386,7 +386,7 @@ while true
 
 
     catch E
-        rethrow(E)
+        % rethrow(E)
         msgText = getReport(E,'basic');
         fprintf("Caught exception: %s\n", msgText)
     end % end try/catch

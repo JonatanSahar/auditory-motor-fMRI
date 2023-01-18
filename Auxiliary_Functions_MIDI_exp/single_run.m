@@ -129,7 +129,7 @@ function [data_table, midi_data_table, shuffled_conditions] = single_run(window,
             break_img = imread('break.JPG');
             display_image(break_img, window);
     catch E
-        rethrow(E)
+        %rethrow(E)
         msgText = getReport(E,'basic');
         fprintf("Caught exception: %s\n", msgText)
         end % try-catch block
