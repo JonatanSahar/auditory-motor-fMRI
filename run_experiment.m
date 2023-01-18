@@ -28,8 +28,8 @@ KbName('UnifyKeyNames');
 previousKeys = RestrictKeysForKbCheck([KbName('ESCAPE')]);
 
 %% Define Parameters
-use_virtual_midi = 1;
-demo_run = 0;
+use_virtual_midi = 0;
+demo_run = 1;
 bNoDisplay = 0;
 
 INVALID_RUN_NUM = 0;
