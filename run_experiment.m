@@ -39,7 +39,7 @@ num_blocks_short = 4;
 num_blocks = 20; % should be 20, must be multiple of 4.
 
 assert(mod(num_blocks, 4) == 0);
-seq_length = 6;
+seq_length = 7;
 num_seqs_in_block = 2;
 num_notes = seq_length * num_seqs_in_block;
 
