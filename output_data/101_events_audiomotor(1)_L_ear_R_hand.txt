@@ -1,3 +1,0 @@
-start_time	play_duration	weight
-4.03327	6.9749	1
-37.323	3.3861	1

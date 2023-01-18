@@ -30,7 +30,7 @@ function [data_table, midi_data_table, shuffled_conditions] = single_run(window,
         [ear, hand] = get_condition_for_block(conditions, 1);
         run_instruction = imread(sprintf('audiomotor_%s_ear.JPG', ear));
         block_instruction = imread('fixation_green.JPG');
-        num_blocks = 1;
+        % num_blocks = 4;
     case 'audiomotor'
         temp_filename = "temp" + "(" + run_type + ")" + ".mat";
         [ear, hand] = get_condition_for_block(conditions, 1);
@@ -57,6 +57,8 @@ function [data_table, midi_data_table, shuffled_conditions] = single_run(window,
             fixation = imread('fixation_black.JPG');
             display_image(fixation, window);
             waitForTimeOrEsc(instruction_time, true, start_tic);
+
+            num_blocks
 
         for i_block = 1:num_blocks
             start_of_block_time = block_start_times(i_block);
@@ -96,7 +98,7 @@ function [data_table, midi_data_table, shuffled_conditions] = single_run(window,
                 err_counter = err_counter + 1;
                 end
 
-            else
+            else % not contains(run_type, 'motor')
                 % for the auditory localizer
                 start_time = toc(start_tic);
                 playGeneratedSequence(ear);
