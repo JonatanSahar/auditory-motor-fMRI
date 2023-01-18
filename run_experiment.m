@@ -377,8 +377,8 @@ while true
             this_ear = table.ear(1);
             events_str = sprintf("%s_%s_ear", events_str, this_ear); % in each run, the ear is kept constant
             splitEventTable(table, 'hand', events_str, output_dir, ["start_time", "play_duration", "weight"]);
-            writetable(midi_table,...
-                       fullfile(output_dir, midi_table_filename));
+            %writetable(midi_table,...
+             %          fullfile(output_dir, midi_table_filename));
     end
 
     clear table midi_data_table midi_table
@@ -386,7 +386,7 @@ while true
 
 
     catch E
-        % rethrow(E)
+        rethrow(E)
         msgText = getReport(E,'basic');
         fprintf("Caught exception: %s\n", msgText)
     end % end try/catch

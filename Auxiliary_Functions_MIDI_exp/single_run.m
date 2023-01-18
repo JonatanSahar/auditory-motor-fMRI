@@ -91,7 +91,7 @@ function [data_table, midi_data_table, shuffled_conditions] = single_run(window,
                 data_table = updateTable(data_table, num_blocks, i_run, i_block, ear, hand, start_time, duration, err);
                 
                 if strcmp(run_type, 'audiomotor')
-                    midi_data_table = updateMidiTable(midi_data_table, i_run, i_block, notes_vec, timestamp_vec);
+             %       midi_data_table = updateMidiTable(midi_data_table, i_run, i_block, notes_vec, timestamp_vec);
                 end
                 
                 if err ~= 'none'
@@ -129,7 +129,7 @@ function [data_table, midi_data_table, shuffled_conditions] = single_run(window,
             break_img = imread('break.JPG');
             display_image(break_img, window);
     catch E
-        % rethrow(E)
+        rethrow(E)
         msgText = getReport(E,'basic');
         fprintf("Caught exception: %s\n", msgText)
         end % try-catch block
