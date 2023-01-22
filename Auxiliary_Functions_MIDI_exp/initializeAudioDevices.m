@@ -3,5 +3,7 @@ function [osc, dev_writer] = initializeAudioDevices()
       osc = audioOscillator('sine', 'Amplitude', 0);
       dev_writer = audioDeviceWriter;
       dev_writer.SupportVariableSizeInput = true;
-      dev_writer.BufferSize = 64; % small buffer keeps MIDI latency low
+      % small buffer keeps MIDI latency low, too small and we get underrun
+      % (=choppy sound)
+      dev_writer.BufferSize = 128; 
 end

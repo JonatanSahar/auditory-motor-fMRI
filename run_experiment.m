@@ -28,9 +28,14 @@ KbName('UnifyKeyNames');
 previousKeys = RestrictKeysForKbCheck([KbName('ESCAPE')]);
 
 %% Define Parameters
-use_virtual_midi = 1;
+use_virtual_midi = 0;
 demo_run = 0;
-bNoDisplay = 0;
+
+global bShowDisplay;
+bShowDisplay = 1;
+
+global bSmallDisplay
+bSmallDisplay = 1;
 
 INVALID_RUN_NUM = 0;
 
@@ -148,10 +153,13 @@ auditory_only_conditions = repmat(condition_pairs, num_blocks/length(condition_p
 
 % screen initialize
 window = 0;
-if ~bNoDisplay
-    global small_window
+if bShowDisplay
     [window, rect] = init_screen('fullscreen');
-    [small_window, rect] = init_screen('small'); % uncomment in magent!
+    
+    if bSmallDisplay
+        global small_window;
+        [small_window, rect] = init_screen('small'); % uncomment in magent!
+    end
 end
 
 % init run numbers for filenames
