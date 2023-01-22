@@ -35,7 +35,7 @@ global bShowDisplay;
 bShowDisplay = 1;
 
 global bSmallDisplay
-bSmallDisplay = 1;
+bSmallDisplay = 0;
 
 INVALID_RUN_NUM = 0;
 
@@ -48,7 +48,7 @@ seq_length = 7;
 num_seqs_in_block = 2;
 num_notes = seq_length * num_seqs_in_block;
 
-instruction_display_duration = 2; % in seconds
+instruction_display_duration = 1; % in seconds
 block_duration = 9; %9 in seconds
 rest_duration = 8; %8 in seconds, between blocks
 rest_duration_short = 3; % in seconds, between blocks
@@ -62,12 +62,14 @@ end
 
 block_and_rest_duration = block_duration + rest_duration;
 cycle_time = block_and_rest_duration + instruction_display_duration; % block+washout+instruction display
+
 block_and_rest_duration_short = block_duration + rest_duration_short;
 cycle_time_short = block_and_rest_duration_short + instruction_display_duration; %
-table_lines_per_block = num_runs + 1; % runs + fam
+
+table_lines_per_block = num_runs + 1; % runs + familiarity
 
 % start times of blocks, starting with a rest period
-% the instruction_display_time is always the time the fixation break ends on
+% the instruction_display_time is always the time the fixation break *ends* on
 instruction_display_times = [rest_duration : ...
                              cycle_time : ...
                              cycle_time * (num_blocks + 1)]; % +1 because we need to wait one last fixation/washout after the last block, and the wait is always until the next instruction
@@ -385,8 +387,8 @@ while true
             this_ear = table.ear(1);
             events_str = sprintf("%s_%s_ear", events_str, this_ear); % in each run, the ear is kept constant
             splitEventTable(table, 'hand', events_str, output_dir, ["start_time", "play_duration", "weight"]);
-            %writetable(midi_table,...
-             %          fullfile(output_dir, midi_table_filename));
+            writetable(midi_table,...
+                      fullfile(output_dir, midi_table_filename));
     end
 
     clear table midi_data_table midi_table
@@ -394,7 +396,7 @@ while true
 
 
     catch E
-        % rethrow(E)
+%         rethrow(E)
         msgText = getReport(E,'basic');
         fprintf("Caught exception: %s\n", msgText)
     end % end try/catch
