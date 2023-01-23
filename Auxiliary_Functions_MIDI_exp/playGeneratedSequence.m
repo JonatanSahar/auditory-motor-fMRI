@@ -55,5 +55,5 @@ function playGeneratedSequence(ear)
     end
     release(osc);
     release(dev_writer);
-    toc(start)
+    toc(start);
 end
