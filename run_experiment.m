@@ -25,20 +25,20 @@ KbName('UnifyKeyNames');
 previousKeys = RestrictKeysForKbCheck([KbName('ESCAPE')]);
 
 %% Define Parameters
-use_virtual_midi = 1;
+use_virtual_midi = 0;
 demo_run = 0;
 
 global bShowDisplay;
-bShowDisplay = 0;
+bShowDisplay = 1;
 
 global bSmallDisplay
-bSmallDisplay = 0;
+bSmallDisplay = 1;
 
 num_runs = 4; % should be 4
 num_blocks_short = 4;
 num_blocks = 20; % should be 20, must be multiple of 4.
-
 assert(mod(num_blocks, 4) == 0);
+
 seq_length = 7;
 num_seqs_in_block = 2;
 num_notes = seq_length * num_seqs_in_block;
