@@ -222,17 +222,17 @@ while true
           case 'sc'
             fprintf("Running a short sound check...\n\n")
 
-            input('both ears (press enter)\n');
+            input('\nboth ears (press enter)\n');
             % fprintf("both: (in 0.1s)\n")
             WaitSecs(0.1)
             playGeneratedSequence('both');
 
-            input('R ear (press enter)\n');
+            input('\nR ear (press enter)\n');
             % fprintf("R: (in 0.1s)\n")
             WaitSecs(0.1)
             playGeneratedSequence('R');
 
-            input('L ear (press enter)\n');
+            input('\nL ear (press enter)\n');
             % fprintf("L: (in 0.1s)\n")
             WaitSecs(0.1)
             playGeneratedSequence('L');
@@ -361,44 +361,46 @@ while true
 
             WaitSecs(0.1);
 
-            writetable(table, fullfile(output_dir, table_filename));
+            save(fullfile(output_dir, table_filename), "table");
+            writetable(table, fullfile(output_dir, table_filename + ".xls"));
 
-            table.weight = ones(length(table.ear), 1);
 
 
             % % create an event file with all events to be separated later.
             % % 5 columns: time, duration, weight, ear, hand.
             % % tab delimited.  1 = L, 2 = R
-            events_str = sprintf("%d_%d_events_%s(%d)",...
-                                 running_count, ...
-                                 subject_number,...
-                                 run_type,...
-                                 file_num);
-            events_filename = events_str + ".mat";
 
-            switch run_type
-              case 'motor_loc'
-                splitEventTable(table, 'hand', events_str, output_dir,...
-                                ["start_time", "play_duration", "weight"]);
-              case 'auditory_loc'
-                splitEventTable(table, 'ear', events_str,...
-                                output_dir,["start_time",...
-                                            "play_duration", ...
-                                            "weight"] );
-              case 'audiomotor'
-                % in each run, the ear is kept constant
-                this_ear = table.ear(1);
+            % table.weight = ones(length(table.ear), 1);
+            % events_str = sprintf("%d_%d_EV_%s_%d",...
+            %                      running_count, ...
+            %                      subject_number,...
+            %                      run_type,...
+            %                      file_num);
+            % events_filename = events_str + ".mat";
 
-                events_str = sprintf("%s_%s_ear", events_str, this_ear);
-                splitEventTable(table, 'hand', events_str, output_dir, ...
-                                ["start_time",...
-                                 "play_duration",...
-                                 "weight"]);
+            % switch run_type
+            %   case 'motor_loc'
+            %     splitEventTable(table, 'hand', events_str, output_dir,...
+            %                     ["start_time", "play_duration", "weight"]);
+            %   case 'auditory_loc'
+            %     splitEventTable(table, 'ear', events_str,...
+            %                     output_dir,["start_time",...
+            %                                 "play_duration", ...
+            %                                 "weight"] );
+            %   case 'audiomotor'
+            %     % in each run, the ear is kept constant
+            %     this_ear = table.ear(1);
 
-                % write the MIDI table to file
-                writetable(midi_table,...
-                           fullfile(output_dir, midi_table_filename));
-            end
+            %     events_str = sprintf("%s_%s_ear", events_str, this_ear);
+            %     splitEventTable(table, 'hand', events_str, output_dir, ...
+            %                     ["start_time",...
+            %                      "play_duration",...
+            %                      "weight"]);
+
+            %     % write the MIDI table to file
+            %     writetable(midi_table,...
+            %                fullfile(output_dir, midi_table_filename));
+            % end
 
     clear table midi_data_table midi_table
     fprintf("******\n  Done!\n******\n\n")

@@ -1,5 +1,12 @@
 
 function splitEventTable(T, affector, prefix, output_dir, fields_to_keep)
+    err_idx = T.error ~= 'none';
+    filtered_rows_err = array2table(T{err_idx, :}, ...
+                            'VariableNames',T.Properties.VariableNames);
+    filtered_rows_err = filtered_rows_err(:, fields_to_keep);
+    file_name_err = sprintf("%s_%s.mat", prefix, "err");
+    save(fullfile(output_dir, file_name_err), "filtered_rows_err");
+
     L_ear_idx = T.ear == 'L';
     R_ear_idx = T.ear == 'R';
     L_hand_idx = T.hand == 'L';

@@ -22,10 +22,9 @@ if ~exist('ear','var')
 end
 
 timedOut = false;
-ERROR_CODE = 999;
-time_of_last_note = ERROR_CODE;
-duration_of_playing = ERROR_CODE;
-time_of_first_note = ERROR_CODE;
+time_of_last_note = 0;
+duration_of_playing = 0;
+time_of_first_note = toc(start_of_run_tic);
 
 correct_notes_R  = repmat([72, 74, 79, 77, 76, 74, 72], 1, 2);
 correct_notes_L  = repmat([55, 53, 48, 50, 52, 53, 55], 1, 2);

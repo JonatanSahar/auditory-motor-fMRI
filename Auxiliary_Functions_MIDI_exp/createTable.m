@@ -12,5 +12,5 @@ function [data_table, filename] = createTable(...
     % table_size = [num_blocks * num_lines_per_block, length(parameters)];
     data_table = table('Size',table_size, 'VariableTypes', var_types, 'VariableNames', parameters);
     % group_name = subjectsGroup(group);
-    filename = sprintf("%d_%s(%s).xls", subject_number, table_name, suffix);
+    filename = sprintf("%d_%s_%s", subject_number, table_name, suffix);
 end
