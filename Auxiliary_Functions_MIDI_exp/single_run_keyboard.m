@@ -43,8 +43,11 @@ function [data_table, midi_data_table, shuffled_conditions] = single_run(window,
         shuffled_conditions = conditions(randperm(length(conditions)), :);
 
         try
+        % wait for a key press in order to continue
+        % KbWait;
+        % WaitSecs(0.5);
         waitForMRI()
-        % ListenChar(-1)
+        ListenChar(-1)
         start_tic = tic;
         err_counter = 0;
 
@@ -78,7 +81,7 @@ function [data_table, midi_data_table, shuffled_conditions] = single_run(window,
             if contains(run_type, 'motor')
                 % for the motor localizer, and the audiomotor runs
                 [start_time, duration, notes_vec, timestamp_vec, err] = ...
-                    single_block(midi_device, ...
+                    playMIDI(midi_device, ...
                     num_notes, ...
                     i_block, ...
                     ear, ...
@@ -130,7 +133,7 @@ function [data_table, midi_data_table, shuffled_conditions] = single_run(window,
 %         rethrow(E)
         msgText = getReport(E,'basic');
         fprintf("Caught exception: %s\n", msgText)
-        % ListenChar()
+        ListenChar()
         end % try-catch block
-        % ListenChar()
+        ListenChar()
 end % function

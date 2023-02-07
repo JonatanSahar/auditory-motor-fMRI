@@ -14,17 +14,46 @@
 
 
 %% Setting up
+
+%% paths
 clc; clear; clear all;
 addpath(fullfile(pwd));
 addpath(fullfile(pwd, 'Auxiliary_Functions_MIDI_exp'));
 addpath(fullfile(pwd, 'instruction_images'));
+
+output_dir = fullfile(pwd, 'output_data');
+
+%% init psychtoolbox & screens
 Screen('Preference', 'VisualDebugLevel', 3); % skip PTB's intro screen
 Screen('Preference', 'SkipSyncTests', 2);
-% Unify keyboard names across software platforms
-KbName('UnifyKeyNames');
-previousKeys = RestrictKeysForKbCheck([KbName('ESCAPE')]);
+white = WhiteIndex(screenNumber);
+black = BlackIndex(screenNumber);
+green=[0,1,0];
+screens = Screen('Screens');
+screenNumber = max(screens);
 
-%% Define Parameters
+[window, windowRect] = PsychImaging('OpenWindow', screenNumber, black);
+Screen('BlendFunction', window, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
+[screenXpixels, screenYpixels] = Screen('WindowSize', window); %get the size of the scrren in pixel
+[xCenter, yCenter] = RectCenter(windowRect); % Get the centre coordinate of the window in pixels
+% text preferences
+Screen('TextSize', window,params.textSize);
+
+%% initialize sound card
+InitializePsychSound(1);
+nrchannels = 2;
+tm=2; % try change to 2 on exp pc...
+
+%% response buttons
+KbName('UnifyKeyNames');
+r=KbName('r');
+b=KbName('b');
+t=KbName('t');
+resp=KbName('SPACE');
+esc=KbName('ESCAPE');
+RestrictKeysForKbCheck([esc t r b]);
+
+%% misc Parameters
 use_virtual_midi = 0;
 demo_run = 0;
 
@@ -34,6 +63,7 @@ bShowDisplay = 1;
 global bSmallDisplay
 bSmallDisplay = 1;
 
+%% run parameters
 num_runs = 4; % should be 4
 num_blocks_short = 4;
 num_blocks = 20; % should be 20, must be multiple of 4.
@@ -55,7 +85,27 @@ if demo_run % override values for a shorter run
     rest_duration = 1; %8 in seconds, between blocks
 end
 
-output_dir = fullfile(pwd, 'output_data');
+% TODO: refactor code to use parameter struct
+p.num_runs = 4; % should be 4
+p.num_blocks_short = 4;
+p.num_blocks = 20; % should be 20, must be multiple of 4.
+p.assert(mod(num_blocks, 4) == 0);
+
+p.seq_length = 7;
+p.num_seqs_in_block = 2;
+p.num_notes = seq_length * num_seqs_in_block;
+
+p.instruction_display_duration = 1; % in seconds
+p.block_duration = 9; %9 in seconds
+p.rest_duration = 8; %8 in seconds, between blocks
+p.rest_duration_short = 3; % in seconds, between blocks
+
+if demo_run % override values for a shorter run
+    p.num_runs = 1;
+    p.num_blocks = 4;
+    p.block_duration = 8; %8 in seconds
+    p.rest_duration = 1; %8 in seconds, between blocks
+end
 
 %% Calculate block timings (at what times to display everything)
 block_and_rest_duration = block_duration + rest_duration;
