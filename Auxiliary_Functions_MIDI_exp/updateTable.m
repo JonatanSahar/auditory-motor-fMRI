@@ -1,13 +1,13 @@
 % update data table with block number, notes pressed and timestamps
-function data_table = updateTable(data_table, num_blocks, i_run, i_block, ear, hand, start_time, duration, error)
-    curr_row = i_block;
+function table = updateTable(P, blockP, table)
+    curr_row = blockP.block_num;
     % curr_row = (i_run - 1) * num_blocks + i_block;
 
-    data_table.run_num(curr_row) = i_run;
-    data_table.block_num(curr_row) = i_block;
-    data_table.start_time(curr_row) = start_time;
-    data_table.play_duration(curr_row) = duration;
-    data_table.ear(curr_row) = ear;
-    data_table.hand(curr_row) = hand;
-    data_table.error(curr_row) = error;
+    table.run_num(curr_row) = P.run_num;
+    table.block_num(curr_row) = blockP.block_num;
+    table.start_time(curr_row) = blockP.start_time;
+    table.play_duration(curr_row) = blockP.duration;
+    table.ear(curr_row) = blockP.ear;
+    table.hand(curr_row) = blockP.hand;
+    table.error(curr_row) = blockP.err;
 end

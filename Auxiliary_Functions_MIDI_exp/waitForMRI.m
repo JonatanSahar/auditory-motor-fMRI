@@ -6,7 +6,7 @@ function waitForMRI()
         if keyCode(KbName('t'))
             t_pressed = true;
             fprintf("got t!\n")
-            DisableKeysForKbCheck(t);
+            DisableKeysForKbCheck(KbName('t'));
         end
         if keyCode(KbName('ESCAPE'))
             return

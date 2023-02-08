@@ -1,4 +1,4 @@
-function [window, rect] = init_screen(size)
+function [window, xCenter, yCenter] = init_screen(size)
     Screen('Preference', 'SkipSyncTests', 2);
     switch size
       case 'small'
@@ -16,4 +16,7 @@ function [window, rect] = init_screen(size)
       case 'fullscreen'
         [window, rect] = Screen('openwindow',2,[120, 120, 120]);
     end
+    % Get the centre coordinate of the window in pixels
+    [xCenter, yCenter] = RectCenter(rect);
+    Screen('BlendFunction', window, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
 end

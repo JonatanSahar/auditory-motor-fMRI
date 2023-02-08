@@ -26,19 +26,17 @@ output_dir = fullfile(pwd, 'output_data');
 %% init psychtoolbox & screens
 Screen('Preference', 'VisualDebugLevel', 3); % skip PTB's intro screen
 Screen('Preference', 'SkipSyncTests', 2);
+screens = Screen('Screens');
+screenNumber = max(screens);
 white = WhiteIndex(screenNumber);
 black = BlackIndex(screenNumber);
 green=[0,1,0];
-screens = Screen('Screens');
-screenNumber = max(screens);
+gray = [120, 120, 120];
 
-[window, windowRect] = PsychImaging('OpenWindow', screenNumber, black);
-Screen('BlendFunction', window, 'GL_SRC_ALPHA', 'GL_ONE_MINUS_SRC_ALPHA');
-[screenXpixels, screenYpixels] = Screen('WindowSize', window); %get the size of the scrren in pixel
-[xCenter, yCenter] = RectCenter(windowRect); % Get the centre coordinate of the window in pixels
+% [window, windowRect] = PsychImaging('OpenWindow', screenNumber, black);
 % text preferences
-Screen('TextSize', window,params.textSize);
-
+% Screen('TextSize', window, P.textSize);
+P.window = [];
 %% initialize sound card
 InitializePsychSound(1);
 nrchannels = 2;
@@ -54,57 +52,51 @@ esc=KbName('ESCAPE');
 RestrictKeysForKbCheck([esc t r b]);
 
 %% misc Parameters
-use_virtual_midi = 0;
-demo_run = 0;
+demo_run = 1;
 
 global bShowDisplay;
-bShowDisplay = 1;
+bShowDisplay = 0;
 
 global bSmallDisplay
 bSmallDisplay = 1;
 
 %% run parameters
-num_runs = 4; % should be 4
-num_blocks_short = 4;
-num_blocks = 20; % should be 20, must be multiple of 4.
-assert(mod(num_blocks, 4) == 0);
 
-seq_length = 7;
-num_seqs_in_block = 2;
-num_notes = seq_length * num_seqs_in_block;
+P.num_runs = 4; % should be 4
+P.num_blocks_short = 4;
+P.num_blocks = 20; % should be 20, must be multiple of 4.
+assert(mod(P.num_blocks, 4) == 0);
+
+% number of button presses in a block
+P.num_events_per_block = 6;
 
 instruction_display_duration = 1; % in seconds
 block_duration = 9; %9 in seconds
 rest_duration = 8; %8 in seconds, between blocks
 rest_duration_short = 3; % in seconds, between blocks
 
+%% display parameters
+P.fixCrossDim = 20; %size of fixation cross in pixels
+P.FixationCoords = [[-P.fixCrossDim P.fixCrossDim 0 0]; [0 0 -P.fixCrossDim P.fixCrossDim]];%setting fixation point coordinations
+P.lineWidthFixation = 4; %line width of fixaton cross in pixels
+P.fixationColorGo = [0,1,0];
+P.fixationColorRest = [1,1,1];
+P.StimDim=[0 0 185 185]; %Set Stimulus Dimantions [top-left-x, top-left-y, bottom-right-x, bottom-right-y].
+P.textSize = 54;
+
+%% sounds
+% TODO: fixme
+% [P.sound.y,P.sound.freq]=audioread('./sound.wav');
+% P.sound.wavedata{1}=[zeros(size(P.sound.y'));P.sound.y']; %% only right ear feedback
+% P.sound.wavedata{2}=[P.sound.y';zeros(size(P.sound.y'))]; %% only left ear feedback
+
+P.volume = 10;
+
 if demo_run % override values for a shorter run
-    num_runs = 1;
-    num_blocks = 4;
+    P.num_runs = 1;
+    P.num_blocks = 4;
     block_duration = 8; %8 in seconds
     rest_duration = 1; %8 in seconds, between blocks
-end
-
-% TODO: refactor code to use parameter struct
-p.num_runs = 4; % should be 4
-p.num_blocks_short = 4;
-p.num_blocks = 20; % should be 20, must be multiple of 4.
-p.assert(mod(num_blocks, 4) == 0);
-
-p.seq_length = 7;
-p.num_seqs_in_block = 2;
-p.num_notes = seq_length * num_seqs_in_block;
-
-p.instruction_display_duration = 1; % in seconds
-p.block_duration = 9; %9 in seconds
-p.rest_duration = 8; %8 in seconds, between blocks
-p.rest_duration_short = 3; % in seconds, between blocks
-
-if demo_run % override values for a shorter run
-    p.num_runs = 1;
-    p.num_blocks = 4;
-    p.block_duration = 8; %8 in seconds
-    p.rest_duration = 1; %8 in seconds, between blocks
 end
 
 %% Calculate block timings (at what times to display everything)
@@ -114,45 +106,32 @@ cycle_time = block_and_rest_duration + instruction_display_duration; % block+was
 block_and_rest_duration_short = block_duration + rest_duration_short;
 cycle_time_short = block_and_rest_duration_short + instruction_display_duration; %
 
-table_lines_per_block = num_runs + 1; % runs + familiarity
-
 % start times of blocks, starting with a rest period
 % the instruction_display_time is always the time the fixation break *ends* on
-instruction_display_times = [rest_duration : ...
-                             cycle_time : ...
-                             cycle_time * (num_blocks + 1)]; % +1 because we need to wait one last fixation/washout after the last block, and the wait is always until the next instruction
+% +1 because we need to wait one last fixation/wash-out after the last block, and the wait is always until the next instruction
+P.instruction_display_times = [rest_duration : ...
+                               cycle_time : ...
+                               cycle_time * (P.num_blocks + 1)];
+P.block_start_times = P.instruction_display_times + instruction_display_duration;
+P.block_end_times = P.block_start_times + block_duration;
 
-block_start_times = instruction_display_times + instruction_display_duration;
-block_end_times = block_start_times + block_duration;
+P.instruction_display_times_short = [rest_duration_short : ...
+                                     cycle_time_short : ...
+                                     cycle_time_short * (P.num_blocks_short + 1)];
 
-instruction_display_times_short = [rest_duration_short : ...
-                                   cycle_time_short : ...
-                                   cycle_time_short * (num_blocks_short + 1)]; % see note above about +1
-
-block_start_times_short = instruction_display_times_short + instruction_display_duration;
-block_end_times_short = block_start_times_short + block_duration;
+P.block_start_times_short = P.instruction_display_times_short + instruction_display_duration;
+P.block_end_times_short = P.block_start_times_short + block_duration;
 
 
 %% Experiment Initialization
-subject_number = input('Please enter the subject''s number\n');
-
-% connect to midi device
-if use_virtual_midi
-    midi_dev = mididevice('LoopBe Internal MIDI');
-else
-    midi_dev = mididevice('Teensy MIDI');
-end
-
+P.subject_number = input('Please enter the subject''s number\n');
 
 %% Initialize Data Table parameters
-parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'ear',    'hand',   'error'};
-var_types =  {'double',  'double',    'double',     'double',       'string',  'string', 'string'};
-
-midi_parameters = {'run_num', 'block_num', 'time_stamp', 'note', 'is_on', 'ipi'};
-midi_var_types =  {'double',  'double',    'double',    'double', 'double', 'double'};
+P.parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'ear',    'hand',   'error'};
+P.var_types =  {'double',  'double',    'double',     'double',       'string',  'string', 'string'};
 
 % init a dummy midi table
-midi_table = [];
+
 
 %% create an assignment of conditions per block
 no_sound = [0, 0];
@@ -168,46 +147,45 @@ hands = [1, 2];
 % short run
 [X, Y] = meshgrid(right_ear,hands);
 condition_pairs = [X(:), Y(:)];
-assert(mod(num_blocks_short, length(condition_pairs)) == 0);
-short_conditions = repmat(condition_pairs, num_blocks_short/length(condition_pairs), 1);
+assert(mod(P.num_blocks_short, length(condition_pairs)) == 0);
+short_conditions = repmat(condition_pairs, P.num_blocks_short/length(condition_pairs), 1);
 
 
 % L ear runs
 [X, Y] = meshgrid(left_ear, hands);
 condition_pairs = [X(:), Y(:)];
-assert(mod(num_blocks, length(condition_pairs)) == 0);
-left_conditions = repmat(condition_pairs, num_blocks/length(condition_pairs), 1);
+assert(mod(P.num_blocks, length(condition_pairs)) == 0);
+left_conditions = repmat(condition_pairs, P.num_blocks/length(condition_pairs), 1);
 
 
 % R ear runs
 [X, Y] = meshgrid(right_ear, hands);
 condition_pairs = [X(:), Y(:)];
-assert(mod(num_blocks, length(condition_pairs)) == 0);
-right_conditions = repmat(condition_pairs, num_blocks/length(condition_pairs), 1);
+assert(mod(P.num_blocks, length(condition_pairs)) == 0);
+right_conditions = repmat(condition_pairs, P.num_blocks/length(condition_pairs), 1);
 
 % motor localizer
 [X, Y] = meshgrid(no_sound, hands);
 condition_pairs = [X(:), Y(:)];
-assert(mod(num_blocks, length(condition_pairs)) == 0);
-motor_only_conditions = repmat(condition_pairs, num_blocks/length(condition_pairs), 1);
+assert(mod(P.num_blocks, length(condition_pairs)) == 0);
+motor_only_conditions = repmat(condition_pairs, P.num_blocks/length(condition_pairs), 1);
 
 
 % auditory localizer
 [X, Y] = meshgrid(both_ears, no_motor);
 condition_pairs = [X(:), Y(:)];
-assert(mod(num_blocks, length(condition_pairs)) == 0);
-auditory_only_conditions = repmat(condition_pairs, num_blocks/length(condition_pairs), 1);
+assert(mod(P.num_blocks, length(condition_pairs)) == 0);
+auditory_only_conditions = repmat(condition_pairs, P.num_blocks/length(condition_pairs), 1);
 
 
 %% screen initialization
 window = 0; % dummy window variable
 if bShowDisplay
-    [window, rect] = init_screen('fullscreen');
+    % [window, xCenter, yCenter] = init_screen('fullscreen');
     
     if bSmallDisplay
-        global small_window;
-        [small_window, rect] = init_screen('small'); % uncomment in magent!
-    end
+        global small_window small_xCenter small_yCenter;
+        [small_window, small_xCenter, small_yCenter] = init_screen('small');     end
 end
 
 %% init run numbers for filenames
@@ -220,16 +198,15 @@ running_count = 0;
 %% Start the main loop - waiting for user input
 while true
     running_count = running_count + 1;
-    midi_table = [];
     str = sprintf('%s\n',...
-                "Which part would you like to run next?", ...
-                "ml - motor localizer", ...
-                "al - auditory localizer", ...
-                "sr - a short run with 4 blocks", ...
-                "sc - a short sound check", ...
-                "kc - a short keyboard check", ...
-                "r - an experimental run", ...
-                "q - quit\n");
+                  "Which part would you like to run next?", ...
+                  "ml - motor localizer", ...
+                  "al - auditory localizer", ...
+                  "sr - a short run with 4 blocks", ...
+                  "sc - a short sound check", ...
+                  "kc - a short keyboard check", ...
+                  "r - an experimental run", ...
+                  "q - quit\n");
 
     command = input(str, 's');
 
@@ -238,13 +215,13 @@ while true
           case 'ml'
             fprintf("Running a motor localizer\n")
 
-            [table, table_filename] = createTable(num_blocks, 1, parameters, var_types, subject_number, 'motor_loc', int2str(i_run_mot));
+            [table, table_filename] = ...
+                createTable(P, 'motor_loc', int2str(i_run_mot));
 
-            conditions = motor_only_conditions;
             % for knowing later what we're supposed to run
-
-            run_num = 1;
-            run_type = 'motor_loc';
+            P.conditions = motor_only_conditions;
+            P.run_num = 1;
+            P.run_type = 'motor_loc';
             file_num = i_run_mot;
 
             i_run_mot = i_run_mot + 1;
@@ -253,23 +230,18 @@ while true
             fprintf("Running an auditory localizer\n")
 
             [table, table_filename] = ...
-                createTable(num_blocks,...
-                            1,...
-                            parameters,...
-                            var_types,...
-                            subject_number,...
-                            'auditory_loc',...
-                            int2str(i_run_aud));
+                createTable(P,'auditory_loc', int2str(i_run_aud));
 
             % for knowing later what we're supposed to run
-            conditions = auditory_only_conditions;
-            run_num = 1;
-            run_type = 'auditory_loc';
+            P.conditions = auditory_only_conditions;
+            P.run_num = 1;
+            P.run_type = 'auditory_loc';
             file_num = i_run_aud;
 
             i_run_aud = i_run_aud + 1;
 
           case 'sc'
+            % TODO fixme
             fprintf("Running a short sound check...\n\n")
 
             input('\nboth ears (press enter)\n');
@@ -292,17 +264,11 @@ while true
 
           case 'sr'
             fprintf("Running a short run (4 blocks)\n")
-            [table, table_filename] = createTable(num_blocks_short,...
-                                                  1,...
-                                                  parameters,...
-                                                  var_types,...
-                                                  subject_number,...
-                                                  'audiomotor_short',...
-                                                  int2str(i_run));
-            run_num = 1;
+            [table, table_filename] = createTable(P,'audiomotor_short', int2str(i_run));
+            P.run_num = 1;
             file_num = 1;
-            run_type = 'audiomotor_short';
-            conditions = short_conditions;
+            P.run_type = 'audiomotor_short';
+            P.conditions = short_conditions;
             running_count = running_count - 1;
 
             WaitSecs(0.1);
@@ -310,16 +276,7 @@ while true
           case 'kc'
             fprintf("Running a keyboard check\n")
 
-            playMIDI( ...
-                midi_dev,...
-                num_notes * 2, ...
-                1, ...
-                'both', ...
-                'R', ...
-                false, ...
-                30,...
-                tic)
-
+            fprintf("FIXME")
 
             WaitSecs(0.1);
 
@@ -327,22 +284,9 @@ while true
             continue
 
           case 'r'
-            [table, table_filename] = createTable(num_blocks,...
-                                                  1,...
-                                                  parameters,...
-                                                  var_types,...
-                                                  subject_number,...
+            [table, table_filename] = createTable(P, ...
                                                   'audiomotor',...
                                                   int2str(i_run));
-            [midi_table, midi_table_filename] = ...
-            createMidiTable(num_runs,...
-                            num_blocks,...
-                            num_notes,...
-                            midi_parameters,...
-                            midi_var_types,...
-                            subject_number,...
-                            'midi_',...
-                            int2str(i_run));
 
             fprintf("Running a full experimental run (20 blocks)\n")
 
@@ -353,10 +297,10 @@ while true
             end
 
             disp_str = sprintf('\n%s\n',...
-                "Which ear to run?", ...
-                "L - left", ...
-                "R- right", ...
-                "Enter - %s (default based on previous run)\n\n")
+                               "Which ear to run?", ...
+                               "L - left", ...
+                               "R- right", ...
+                               "Enter - %s (default based on previous run)\n\n");
 
             disp_str = sprintf(disp_str, curr_ear);
 
@@ -367,14 +311,14 @@ while true
             end
 
             if curr_ear == 'L'
-                conditions = left_conditions;
+                P.conditions = left_conditions;
             else
-                conditions = right_conditions;
+                P.conditions = right_conditions;
             end
 
             % for knowing later what we're supposed to run
-            run_num = i_run;
-            run_type = 'audiomotor';
+            P.run_num = i_run;
+            P.run_type = 'audiomotor';
             file_num = i_run;
 
             i_run = i_run + 1;
@@ -395,68 +339,19 @@ while true
         end % end switch-case
 
         %% run the chosen condition
-        [table, midi_table, shuffled_conditions] = ...
-            single_run(window, ...
-                       midi_dev, ...
-                       midi_table, ...
-                       table, ...
-                       conditions,...
-                       num_notes, ...
-                       num_blocks, ...
-                       instruction_display_times, ...
-                       block_start_times, ...
-                       block_end_times, ...
-                       run_num, ...
-                       run_type);
+        [table, shuffled_conditions] = ...
+            single_run(P, table);
 
-            WaitSecs(0.1);
+        WaitSecs(0.1);
 
-            save(fullfile(output_dir, table_filename), "table");
-            writetable(table, fullfile(output_dir, table_filename + ".xls"));
+        save(fullfile(output_dir, table_filename), "table");
+        writetable(table, fullfile(output_dir, table_filename + ".xls"));
 
-
-
-            % % create an event file with all events to be separated later.
-            % % 5 columns: time, duration, weight, ear, hand.
-            % % tab delimited.  1 = L, 2 = R
-
-            % table.weight = ones(length(table.ear), 1);
-            % events_str = sprintf("%d_%d_EV_%s_%d",...
-            %                      running_count, ...
-            %                      subject_number,...
-            %                      run_type,...
-            %                      file_num);
-            % events_filename = events_str + ".mat";
-
-            % switch run_type
-            %   case 'motor_loc'
-            %     splitEventTable(table, 'hand', events_str, output_dir,...
-            %                     ["start_time", "play_duration", "weight"]);
-            %   case 'auditory_loc'
-            %     splitEventTable(table, 'ear', events_str,...
-            %                     output_dir,["start_time",...
-            %                                 "play_duration", ...
-            %                                 "weight"] );
-            %   case 'audiomotor'
-            %     % in each run, the ear is kept constant
-            %     this_ear = table.ear(1);
-
-            %     events_str = sprintf("%s_%s_ear", events_str, this_ear);
-            %     splitEventTable(table, 'hand', events_str, output_dir, ...
-            %                     ["start_time",...
-            %                      "play_duration",...
-            %                      "weight"]);
-
-            %     % write the MIDI table to file
-            %     writetable(midi_table,...
-            %                fullfile(output_dir, midi_table_filename));
-            % end
-
-    clear table midi_data_table midi_table
-    fprintf("******\n  Done!\n******\n\n")
+        clear table
+        fprintf("******\n  Done!\n******\n\n")
 
     catch E
-%         rethrow(E)
+                rethrow(E)
         msgText = getReport(E,'basic');
         fprintf("Caught exception: %s\n", msgText)
     end % end try/catch
