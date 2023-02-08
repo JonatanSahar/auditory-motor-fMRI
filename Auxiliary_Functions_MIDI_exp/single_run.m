@@ -33,17 +33,18 @@ function [table, shuffled_conditions] = single_run(P, table)
 
         try
         waitForMRI()
-        % ListenChar(-1)
-        blockP.start_tic = tic;
         err_counter = 0;
 
-            % wait before the first block
-            instruction_time = P.instruction_display_times(1);
-            [blockP.ear, blockP.hand] = get_condition_for_block(shuffled_conditions, 1);
+        P.run_start_tic = tic;
+        % wait before the first block
+        instruction_time = P.instruction_display_times(1);
+        [blockP.ear, blockP.hand] = get_condition_for_block(shuffled_conditions, 1);
 
-            fixation = imread('fixation_black.JPG');
-            display_image(fixation, P.window);
-            waitForTimeOrEsc(instruction_time, true, blockP.start_tic);
+        fixation = imread('fixation_black.JPG');
+        display_image(fixation, P.window);
+
+        % wait for signal wash-out befor first stimulus
+        waitForTimeOrEsc(instruction_time, true, P.run_start_tic);
 
         for block_num = 1:P.num_blocks
             blockP.block_num = block_num;
@@ -51,7 +52,7 @@ function [table, shuffled_conditions] = single_run(P, table)
             blockP.end_of_block_time = P.block_end_times(block_num);
             [blockP.ear, blockP.hand] = get_condition_for_block(shuffled_conditions, block_num);
 
-            blockP.start_time = toc(blockP.start_tic);
+            blockP.start_time = toc(P.run_start_tic);
             % get the correct image for the run instruction
             if contains(P.run_type, 'motor')
                 instruction = imread(sprintf('%s.JPG', blockP.hand));

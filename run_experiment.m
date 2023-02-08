@@ -21,17 +21,17 @@ addpath(fullfile(pwd));
 addpath(fullfile(pwd, 'Auxiliary_Functions_MIDI_exp'));
 addpath(fullfile(pwd, 'instruction_images'));
 
-output_dir = fullfile(pwd, 'output_data');
+P.output_dir = fullfile(pwd, 'output_data');
 
 %% init psychtoolbox & screens
 Screen('Preference', 'VisualDebugLevel', 3); % skip PTB's intro screen
 Screen('Preference', 'SkipSyncTests', 2);
 screens = Screen('Screens');
-screenNumber = max(screens);
-white = WhiteIndex(screenNumber);
-black = BlackIndex(screenNumber);
-green=[0,1,0];
-gray = [120, 120, 120];
+P.screenNumber = max(screens);
+P.white = WhiteIndex(screenNumber);
+P.black = BlackIndex(screenNumber);
+P.green=[0,1,0];
+P.gray = [120, 120, 120];
 
 % [window, windowRect] = PsychImaging('OpenWindow', screenNumber, black);
 % text preferences
@@ -77,11 +77,11 @@ rest_duration_short = 3; % in seconds, between blocks
 
 %% display parameters
 P.fixCrossDim = 20; %size of fixation cross in pixels
-P.FixationCoords = [[-P.fixCrossDim P.fixCrossDim 0 0]; [0 0 -P.fixCrossDim P.fixCrossDim]];%setting fixation point coordinations
+P.fixationCoords = [[-P.fixCrossDim P.fixCrossDim 0 0]; [0 0 -P.fixCrossDim P.fixCrossDim]];%setting fixation point coordinations
 P.lineWidthFixation = 4; %line width of fixaton cross in pixels
 P.fixationColorGo = [0,1,0];
 P.fixationColorRest = [1,1,1];
-P.StimDim=[0 0 185 185]; %Set Stimulus Dimantions [top-left-x, top-left-y, bottom-right-x, bottom-right-y].
+P.stimDim=[0 0 185 185]; %Set Stimulus Dimantions [top-left-x, top-left-y, bottom-right-x, bottom-right-y].
 P.textSize = 54;
 
 %% sounds
@@ -89,7 +89,7 @@ P.textSize = 54;
 % [P.sound.y,P.sound.freq]=audioread('./sound.wav');
 % P.sound.wavedata{1}=[zeros(size(P.sound.y'));P.sound.y']; %% only right ear feedback
 % P.sound.wavedata{2}=[P.sound.y';zeros(size(P.sound.y'))]; %% only left ear feedback
-
+P.InterPressInterval = 0.5
 P.volume = 10;
 
 if demo_run % override values for a shorter run
@@ -198,6 +198,8 @@ running_count = 0;
 %% Start the main loop - waiting for user input
 while true
     running_count = running_count + 1;
+    P.log.cueTimes = zeros(P.num_blocks, P.num_events_per_block);
+    P.log.RT = zeros(P.num_blocks, P.num_events_per_block);
     str = sprintf('%s\n',...
                   "Which part would you like to run next?", ...
                   "ml - motor localizer", ...
