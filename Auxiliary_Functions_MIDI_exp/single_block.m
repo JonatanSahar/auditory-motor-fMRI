@@ -1,8 +1,7 @@
 % receive and synthesize note messages from midi in real time
-function err_type = single_block(p, blockP)
+function single_block(P, blockP)
     fprintf("Play!\n");
     err_type = 0;
-    return
 
     if ~exist('bMute','var')
         % mute was not specified, default it to 0
@@ -14,97 +13,38 @@ function err_type = single_block(p, blockP)
         ear = 'both';
     end
 
-
-
-    % psuedo code:
-    % present black fixation
-    % for numEventsPerBlock:
-    %   wait interval
-    %   present green fixation
-    %   wait for button press
-    %   after interval present black fixation again.
-    %   verify it's the correct button
-    %   play sound to correct ear
-    %
     try % a single block
-        noteCount = 1;
+        eventCount = 1;
         blockP.actualStartOfBlockTime = toc(P.start_of_run_tic);
-        while ((toc((P.run_start_tic))) <= blockP.end_of_block_time)
+        while (toc(P.start_of_run_tic) <= blockP.end_of_block_time)
             drawFixation(P, P.fixationColorGo);
-            lastStimTic = tic;
-            pressed=0;
-
-            % busywait for button press, counting the RT
-            while ~pressed && toc(lastStimTic) < P.interPressInterval
-                [keyIsDown ,sec, keyCode] = KbCheck;
-                if correctKEyPressed(keyCode)
-                    P.log.RT(blockP.block_num, noteCount) = toc(lastStimTic);
-                    P.log.cueTimes(blockP.block_num, noteCount) = toc(P.startRun);
-                    pressed = true;
-                    delay = tic;
-                    drawFixation(P, P.fixationColorRest);
-
-                % incorrect buton pressed - flash an X and wait for press
+            P.lastStimTic = tic;
+            P.log.cueTimes(blockP.block_num, eventCount) = toc(P.start_of_run_tic);
+            
+            key = waitForResponseBox(P, P.fixationDisplayDuration)
+            P.log.pressTimes(blockP.block_num, eventCount) = toc(P.start_of_run_tic);
+            if key ~= 'none' & isCorrectKey(key, blockP.hand)
+                drawFixation(P, P.fixationColorRest);
+                P.log.errors(blockP.block_num, eventCount) = "NONE";
+                playSound(P, blockP.ear, false)
+            else
+                % no buttons pressed
+                if key == 'none'
+                    blockP.err.MISSED_CUE =  blockP.err.MISSED_CUE + 1;
+                    P.log.errors(blockP.block_num, eventCount) = "MISSED_CUE";
+                % incorrect buton pressed
                 else
-                    err = true;
-                    DrawFormattedText(P.window, 'X' ,'center', 'center', [1,0,0]);
-                    Screen('Flip', P.window);
-                    WaitSecs(0.1)
-                    drawFixation(P, P.fixationColorGo);
+                    blockP.err.WRONG_RESPONSE = blockP.err.WRONG_RESPONSE + 1;
+                    P.log.errors(blockP.block_num, eventCount) = "WRONG_RESPONSE";
                 end
+                drawError(P, P.fixationColorRest); % flash a red background
+                drawFixation(P, P.fixationColorRest);
             end
-            % busywait till the next press is due..
-            while toc(lastStimTic)<P.interPressInterval
-            end
+            waitForTimeOrEsc(P.interPressInterval, true, P.lastStimTic);
+            eventCount = eventCount + 1;
         end
+    catch E
+        rethrow E
     end
 
-
-
-    if bMute
-        dev_writer(mute_waveform);
-    else
-        if strcmp(ear, 'R')
-            dev_writer([mute_waveform, osc()]);
-        elseif strcmp(ear, 'L')
-            dev_writer([osc(), mute_waveform()]);
-        elseif strcmp(ear, 'both')
-            dev_writer(osc());
-        end
-    end
-
-end % while
-
-time_of_last_note = toc(start_of_run_tic);
-duration_of_playing = time_of_last_note - time_of_first_note;
-
-        catch E
-            clear sound
-
-            % release objects
-            release(osc);
-            release(dev_writer);
-            rethrow(E)
-        end % try/catch
-
-        clear sound
-
-        % release objects
-        release(osc);
-        release(dev_writer);
-        start_time = time_of_first_note;
-        duration = duration_of_playing;
-
-        % detect errors in block
-        err = 0;
-        err_type = "none";
-        if strcmp(hand, 'R')
-        elseif strcmp(hand, 'L')
-        end
-
-end
-
-function correctKEyPressed(hand, keyCodeArr)
-    return (keyCode(r) && isequal(P.hand, 'R'))  || (keyCode(b) && isequal(P.hand, 'L'))
-end
 

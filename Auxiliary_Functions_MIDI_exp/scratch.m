@@ -36,8 +36,8 @@ blockP.end_of_block_time = 5;
 P.start_of_run_tic = tic;
 P.run_start_time = toc(P.start_of_run_tic);
 blockP.currentHand = 'R';
-pBlock.err.WRONG_RESPONSE  = 0;
-pBlock.err.MISSED_CUE  = 0;
+blockP.err.WRONG_RESPONSE  = 0;
+blockP.err.MISSED_CUE  = 0;
 
 P.log.cueTimes = nan(P.num_blocks,P.num_events_per_block);
 P.log.pressTimes = nan(P.num_blocks,P.num_events_per_block);
@@ -59,10 +59,10 @@ while ((toc(P.start_of_run_tic)) <= blockP.end_of_block_time)
     else
         % incorrect buton pressed
         if key == 'none'
-            pBlock.err.MISSED_CUE =  pBlock.err.MISSED_CUE + 1;
+            blockP.err.MISSED_CUE =  blockP.err.MISSED_CUE + 1;
             P.log.errors(blockP.block_num, eventCount) = "MISSED_CUE";
         else
-            pBlock.err.WRONG_RESPONSE = pBlock.err.WRONG_RESPONSE + 1;
+            blockP.err.WRONG_RESPONSE = blockP.err.WRONG_RESPONSE + 1;
             P.log.errors(blockP.block_num, eventCount) = "WRONG_RESPONSE";
         end
         drawError(P, P.fixationColorRest); % flash a red background

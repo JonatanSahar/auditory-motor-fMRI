@@ -16,7 +16,7 @@
 %% Setting up
 
 %% paths
-clc; clear; clear all;
+clc; clear; clear all; sca
 addpath(fullfile(pwd));
 addpath(fullfile(pwd, 'Auxiliary_Functions_MIDI_exp'));
 addpath(fullfile(pwd, 'instruction_images'));
@@ -28,9 +28,10 @@ Screen('Preference', 'VisualDebugLevel', 3); % skip PTB's intro screen
 Screen('Preference', 'SkipSyncTests', 2);
 screens = Screen('Screens');
 P.screenNumber = max(screens);
-P.white = WhiteIndex(screenNumber);
-P.black = BlackIndex(screenNumber);
+P.white = WhiteIndex(P.screenNumber);
+P.black = BlackIndex(P.screenNumber);
 P.green=[147, 197, 114];
+P.red=[199, 0, 57];
 P.gray = [120, 120, 120];
 
 % [window, windowRect] = PsychImaging('OpenWindow', screenNumber, black);
@@ -55,42 +56,50 @@ RestrictKeysForKbCheck([esc t r b]);
 demo_run = 1;
 
 global bShowDisplay;
-bShowDisplay = 0;
+bShowDisplay = 1;
 
 global bSmallDisplay
-bSmallDisplay = 1;
+bSmallDisplay = 0;
 
-%% run parameters
+%% run % block parameters
 
 P.num_runs = 4; % should be 4
 P.num_blocks_short = 4;
 P.num_blocks = 20; % should be 20, must be multiple of 4.
 assert(mod(P.num_blocks, 4) == 0);
 
-% number of button presses in a block
-P.num_events_per_block = 6;
-
+P.num_events_per_block = 6; % number of button presses in a block
 instruction_display_duration = 1; % in seconds
 block_duration = 9; %9 in seconds
 rest_duration = 8; %8 in seconds, between blocks
 rest_duration_short = 3; % in seconds, between blocks
 
-%% display parameters
-P.fixCrossDim = 20; %size of fixation cross in pixels
-P.fixationCoords = [[-P.fixCrossDim P.fixCrossDim 0 0]; [0 0 -P.fixCrossDim P.fixCrossDim]];%setting fixation point coordinations
-P.lineWidthFixation = 4; %line width of fixaton cross in pixels
+%% fixation parameters
+P.fixCrossDim = 50; %size of fixation cross in pixels
+P.fixationCoords = [[-P.fixCrossDim P.fixCrossDim 0 0]; ...
+                    [0 0 -P.fixCrossDim P.fixCrossDim]];
+P.lineWidthFixation = 8; %line width of fixaton cross in pixels
 P.fixationColorGo = P.green;
 P.fixationColorRest = P.black;
-P.stimDim=[0 0 185 185]; %Set Stimulus Dimantions [top-left-x, top-left-y, bottom-right-x, bottom-right-y].
+P.fixationDisplayDuration = 0.8;
+% [top-left-x, top-left-y, bottom-right-x, bottom-right-y].
+P.stimDim=[0 0 185 185];
 P.textSize = 54;
 
 %% sounds
 % TODO: fixme
-% [P.sound.y,P.sound.freq]=audioread('./sound.wav');
-% P.sound.wavedata{1}=[zeros(size(P.sound.y'));P.sound.y']; %% only right ear feedback
-% P.sound.wavedata{2}=[P.sound.y';zeros(size(P.sound.y'))]; %% only left ear feedback
-P.interPressInterval = 0.5
+[P.sound.y,P.sound.freq]=audioread('./audio_files/middleC.ogg');
+P.sound.y=P.sound.y(1:end/2);
+P.sound.wavedata=[P.sound.y';P.sound.y'];
+P.sound.right = [zeros(size(P.sound.y'));P.sound.y'];
+P.sound.left = [P.sound.y';zeros(size(P.sound.y'))];
+
+P.interPressInterval = 2
 P.volume = 10;
+
+%% logging
+blockP.err.WRONG_RESPONSE  = 0;
+blockP.err.MISSED_CUE  = 0;
 
 if demo_run % override values for a shorter run
     P.num_runs = 1;
@@ -127,7 +136,7 @@ P.block_end_times_short = P.block_start_times_short + block_duration;
 P.subject_number = input('Please enter the subject''s number\n');
 
 %% Initialize Data Table parameters
-P.parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'ear',    'hand',   "MISSED_CUE", "WRONG_RESPONSE"};
+P.parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'ear',    'hand',   'MISSED_CUE', 'WRONG_RESPONSE'};
 P.var_types =  {'double',  'double',    'double',     'double',       'string',  'string', 'string', 'string'};
 
 % init a dummy midi table
@@ -181,11 +190,12 @@ auditory_only_conditions = repmat(condition_pairs, P.num_blocks/length(condition
 %% screen initialization
 window = 0; % dummy window variable
 if bShowDisplay
-    % [window, xCenter, yCenter] = init_screen('fullscreen');
+    [P.window, P.xCenter, P.yCenter] = init_screen('small');
     
     if bSmallDisplay
         global small_window small_xCenter small_yCenter;
-        [small_window, small_xCenter, small_yCenter] = init_screen('small');     end
+        [P.small_window, P.small_xCenter, P.small_yCenter] = init_screen('small');
+    end
 end
 
 %% init run numbers for filenames
