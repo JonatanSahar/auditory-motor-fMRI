@@ -3,6 +3,7 @@ function [window, xCenter, yCenter] = init_screen(size)
     switch size
       case 'small'
         init_pos_x = 20
+        init_pos_x = -1700 % uncomment at home
         %init_pos_x = 2000 % uncomment in magnet
         init_pos_y = 10
 

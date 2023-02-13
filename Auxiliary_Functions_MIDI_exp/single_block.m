@@ -35,7 +35,7 @@ function err_type = single_block(p, blockP)
             pressed=0;
 
             % busywait for button press, counting the RT
-            while ~pressed && toc(lastStimTic) < P.InterPressInterval
+            while ~pressed && toc(lastStimTic) < P.interPressInterval
                 [keyIsDown ,sec, keyCode] = KbCheck;
                 if correctKEyPressed(keyCode)
                     P.log.RT(blockP.block_num, noteCount) = toc(lastStimTic);
@@ -54,7 +54,7 @@ function err_type = single_block(p, blockP)
                 end
             end
             % busywait till the next press is due..
-            while toc(lastStimTic)<P.InterPressInterval
+            while toc(lastStimTic)<P.interPressInterval
             end
         end
     end
@@ -108,8 +108,3 @@ function correctKEyPressed(hand, keyCodeArr)
     return (keyCode(r) && isequal(P.hand, 'R'))  || (keyCode(b) && isequal(P.hand, 'L'))
 end
 
-function drawFixation(P, color)
-
-            Screen('DrawLines', P.window, P.fixationCoords, P.lineWidthFixation, color, [P.xCenter P.yCenter], 2);
-            Screen('Flip', P.window);
-end

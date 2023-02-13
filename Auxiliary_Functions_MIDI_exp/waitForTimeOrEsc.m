@@ -1,19 +1,16 @@
-function waitForTimeOrEsc(timeToWait, bAbsoluteTime, startTic)
+function keyCode = waitForTimeOrEsc(timeToWait, bCountFromTic, startTic)
 % This function operates in two modes:
 % If only the time interaval to wait is given - it waits for the specified time.
-% If bAbsoluteTime is specified, it waits for the remainig duration between startTic and the specified time.
+% If bCountFromTic is specified, it waits for the remainig duration between startTic and the specified time.
 %
-    if ~exist('bAbsoluteTime','var') || bAbsoluteTime ~= true
+    if ~exist('bCountFromTic','var') || bCountFromTic ~= true
         startTic = tic;
-    % else fprintf("time left in run %f secs\n", timeToWait)
     end
-    % repeat until a valid key is pressed or we time out
+    keyCode = zeros(1, 256);
     timedOut = false;
+
     while ~timedOut
-        % check if a key is pressed
-        % only keys specified in activeKeys are considered valid
-        if((toc(startTic)) >= timeToWait), timedOut = true; % fprintf("time passed %f secs\n", (toc(startTic)));
-        else
+        if((toc(startTic)) >= timeToWait), timedOut = true;
             [ keyIsDown, keyTime, keyCode ] = KbCheck;
             if keyCode(KbName('ESCAPE'))
                 throw(MException('MATLAB:badMojo','ESC called'));

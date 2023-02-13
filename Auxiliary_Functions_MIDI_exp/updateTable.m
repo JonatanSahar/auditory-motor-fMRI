@@ -9,5 +9,6 @@ function table = updateTable(P, blockP, table)
     table.play_duration(curr_row) = blockP.duration;
     table.ear(curr_row) = blockP.ear;
     table.hand(curr_row) = blockP.hand;
-    table.error(curr_row) = blockP.err;
+    table.MISSED_CUE(curr_row) = pBlock.err.MISSED_CUE;
+    table.WRONG_RESPONSE(curr_row) = pBlock.err.WRONG_RESPONSE;
 end

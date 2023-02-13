@@ -30,7 +30,7 @@ screens = Screen('Screens');
 P.screenNumber = max(screens);
 P.white = WhiteIndex(screenNumber);
 P.black = BlackIndex(screenNumber);
-P.green=[0,1,0];
+P.green=[147, 197, 114];
 P.gray = [120, 120, 120];
 
 % [window, windowRect] = PsychImaging('OpenWindow', screenNumber, black);
@@ -79,8 +79,8 @@ rest_duration_short = 3; % in seconds, between blocks
 P.fixCrossDim = 20; %size of fixation cross in pixels
 P.fixationCoords = [[-P.fixCrossDim P.fixCrossDim 0 0]; [0 0 -P.fixCrossDim P.fixCrossDim]];%setting fixation point coordinations
 P.lineWidthFixation = 4; %line width of fixaton cross in pixels
-P.fixationColorGo = [0,1,0];
-P.fixationColorRest = [1,1,1];
+P.fixationColorGo = P.green;
+P.fixationColorRest = P.black;
 P.stimDim=[0 0 185 185]; %Set Stimulus Dimantions [top-left-x, top-left-y, bottom-right-x, bottom-right-y].
 P.textSize = 54;
 
@@ -89,7 +89,7 @@ P.textSize = 54;
 % [P.sound.y,P.sound.freq]=audioread('./sound.wav');
 % P.sound.wavedata{1}=[zeros(size(P.sound.y'));P.sound.y']; %% only right ear feedback
 % P.sound.wavedata{2}=[P.sound.y';zeros(size(P.sound.y'))]; %% only left ear feedback
-P.InterPressInterval = 0.5
+P.interPressInterval = 0.5
 P.volume = 10;
 
 if demo_run % override values for a shorter run
@@ -127,8 +127,8 @@ P.block_end_times_short = P.block_start_times_short + block_duration;
 P.subject_number = input('Please enter the subject''s number\n');
 
 %% Initialize Data Table parameters
-P.parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'ear',    'hand',   'error'};
-P.var_types =  {'double',  'double',    'double',     'double',       'string',  'string', 'string'};
+P.parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'ear',    'hand',   "MISSED_CUE", "WRONG_RESPONSE"};
+P.var_types =  {'double',  'double',    'double',     'double',       'string',  'string', 'string', 'string'};
 
 % init a dummy midi table
 
