@@ -32,7 +32,7 @@ P.white = WhiteIndex(P.screenNumber);
 P.black = BlackIndex(P.screenNumber);
 P.green=[147, 197, 114];
 P.red=[199, 0, 57];
-P.gray = [120, 120, 120];
+P.gray = [230, 230, 230];
 
 % [window, windowRect] = PsychImaging('OpenWindow', screenNumber, black);
 % text preferences
@@ -40,8 +40,8 @@ P.gray = [120, 120, 120];
 P.window = [];
 %% initialize sound card
 InitializePsychSound(1);
-nrchannels = 2;
-tm=2; % try change to 2 on exp pc...
+P.nrchannels = 2;
+P.latenceyReq=2; % try change to 2 on exp pc...
 
 %% response buttons
 KbName('UnifyKeyNames');
@@ -55,11 +55,9 @@ RestrictKeysForKbCheck([esc t r b]);
 %% misc Parameters
 demo_run = 1;
 
-global bShowDisplay;
-bShowDisplay = 1;
+P.bShowDisplay = 0;
 
-global bSmallDisplay
-bSmallDisplay = 0;
+P.bShowSmallDisplay = 1;
 
 %% run % block parameters
 
@@ -89,17 +87,16 @@ P.textSize = 54;
 %% sounds
 % TODO: fixme
 [P.sound.y,P.sound.freq]=audioread('./audio_files/middleC.ogg');
-P.sound.y=P.sound.y(1:end/2);
+P.sound.y=P.sound.y(1:end);
 P.sound.wavedata=[P.sound.y';P.sound.y'];
 P.sound.right = [zeros(size(P.sound.y'));P.sound.y'];
 P.sound.left = [P.sound.y';zeros(size(P.sound.y'))];
+P.sound.silence = [zeros(size(P.sound.y'));zeros(size(P.sound.y'))];
 
 P.interPressInterval = 2
 P.volume = 10;
 
 %% logging
-blockP.err.WRONG_RESPONSE  = 0;
-blockP.err.MISSED_CUE  = 0;
 
 if demo_run % override values for a shorter run
     P.num_runs = 1;
@@ -137,7 +134,7 @@ P.subject_number = input('Please enter the subject''s number\n');
 
 %% Initialize Data Table parameters
 P.parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'ear',    'hand',   'MISSED_CUE', 'WRONG_RESPONSE'};
-P.var_types =  {'double',  'double',    'double',     'double',       'string',  'string', 'string', 'string'};
+P.var_types =  {'double',  'double',    'double',     'double',       'string',  'string', 'double', 'double'};
 
 % init a dummy midi table
 
@@ -154,7 +151,7 @@ hands = [1, 2];
 % shuffle it to get a randomized block order per run.
 
 % short run
-[X, Y] = meshgrid(right_ear,hands);
+[X, Y] = meshgrid(left_ear,hands);
 condition_pairs = [X(:), Y(:)];
 assert(mod(P.num_blocks_short, length(condition_pairs)) == 0);
 short_conditions = repmat(condition_pairs, P.num_blocks_short/length(condition_pairs), 1);
@@ -189,13 +186,12 @@ auditory_only_conditions = repmat(condition_pairs, P.num_blocks/length(condition
 
 %% screen initialization
 window = 0; % dummy window variable
-if bShowDisplay
-    [P.window, P.xCenter, P.yCenter] = init_screen('small');
-    
-    if bSmallDisplay
-        global small_window small_xCenter small_yCenter;
-        [P.small_window, P.small_xCenter, P.small_yCenter] = init_screen('small');
-    end
+if P.bShowDisplay
+    [P.window, P.xCenter, P.yCenter] = init_screen(P, 'fullscreen');
+end
+
+if P.bShowSmallDisplay
+    [P.small_window, P.small_xCenter, P.small_yCenter] = init_screen(P, 'small');
 end
 
 %% init run numbers for filenames
@@ -208,8 +204,6 @@ running_count = 0;
 %% Start the main loop - waiting for user input
 while true
     running_count = running_count + 1;
-    P.log.cueTimes = zeros(P.num_blocks, P.num_events_per_block);
-    P.log.RT = zeros(P.num_blocks, P.num_events_per_block);
     str = sprintf('%s\n',...
                   "Which part would you like to run next?", ...
                   "ml - motor localizer", ...
@@ -339,8 +333,15 @@ while true
             break
 
           case 'i'
-            init_screen('small') % small window
-            init_screen('fullscreen')
+
+            if P.bShowDisplay
+                [P.window, P.xCenter, P.yCenter] = init_screen(P, 'fullscreen');
+            end
+
+            if P.bShowSmallDisplay
+                [P.small_window, P.small_xCenter, P.small_yCenter] = ...
+                    init_screen(P, 'small');
+            end
             running_count = running_count - 1;
             continue
 
@@ -351,13 +352,18 @@ while true
         end % end switch-case
 
         %% run the chosen condition
-        [table, shuffled_conditions] = ...
+        [table, shuffled_conditions, outP] = ...
             single_run(P, table);
 
+        log.cueTimes = outP.log.cueTimes;
+        log.pressTimes = outP.log.pressTimes;
+        log.errors = outP.log.errors;
+        log.blockConditionsInOrder = shuffled_conditions;
         WaitSecs(0.1);
 
-        save(fullfile(output_dir, table_filename), "table");
-        writetable(table, fullfile(output_dir, table_filename + ".xls"));
+        save(fullfile(P.output_dir, table_filename), "table");
+        save(fullfile(P.output_dir, table_filename + "_log"), "log");
+        writetable(table, fullfile(P.output_dir, table_filename + ".xls"));
 
         clear table
         fprintf("******\n  Done!\n******\n\n")
@@ -373,7 +379,7 @@ end % end while(true)
 % end slide
 WaitSecs(0.1);
 instruction = imread('thank_you_end.JPG');
-display_image(instruction, window);
+display_image(P, instruction);
 
 
 % wait for a key press in order to continue

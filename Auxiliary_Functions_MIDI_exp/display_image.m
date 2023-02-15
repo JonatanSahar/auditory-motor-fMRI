@@ -1,25 +1,19 @@
+function display_image(P, image)
+    if P.bShowSmallDisplay
+        Screen('FillRect', P.small_window, [230, 230, 230])
+        Screen('Flip', P.small_window);
+        TexturePointer = Screen('MakeTexture',P.small_window, image);
+        Screen('DrawTexture',P.small_window, TexturePointer);
+        Screen('Flip', P.small_window);
+    end
 
-function display_image(image, window)
-global bShowDisplay;
-global bSmallDisplay;
-
-if ~bShowDisplay
-    return
-end
-
-if bSmallDisplay
-    global small_window;
-    Screen('Flip', small_window);
-    TexturePointer = Screen('MakeTexture',small_window, image);
-    Screen('DrawTexture',small_window, TexturePointer);
-    Screen('Flip', small_window);
-end
-
-Screen('FillRect', window, [230, 230, 230])
-Screen('Flip', window);
-TexturePointer = Screen('MakeTexture',window, image);
-Screen('DrawTexture',window, TexturePointer);
-Screen('Flip', window);
+    if P.bShowDisplay
+        Screen('FillRect', P.window, [230, 230, 230])
+        Screen('Flip', P.window);
+        TexturePointer = Screen('MakeTexture',P.window, image);
+        Screen('DrawTexture',P.window, TexturePointer);
+        Screen('Flip', P.window);
+    end
 
 
 end

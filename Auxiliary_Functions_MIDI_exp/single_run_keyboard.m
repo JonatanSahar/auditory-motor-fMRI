@@ -39,7 +39,7 @@ function [data_table, midi_data_table, shuffled_conditions] = single_run(window,
     end
 
         temp_filename = fullfile(base_path, temp_filename);
-        display_image(run_instruction, window);
+        display_image(P, run_instruction);
         shuffled_conditions = conditions(randperm(length(conditions)), :);
 
         try
@@ -56,7 +56,7 @@ function [data_table, midi_data_table, shuffled_conditions] = single_run(window,
             [ear, hand] = get_condition_for_block(shuffled_conditions, 1);
 
             fixation = imread('fixation_black.JPG');
-            display_image(fixation, window);
+            display_image(P, fixation);
             waitForTimeOrEsc(instruction_time, true, start_tic);
 
             num_blocks
@@ -73,9 +73,9 @@ function [data_table, midi_data_table, shuffled_conditions] = single_run(window,
                 instruction = imread(sprintf('%s.JPG', ear));
             end
 
-            display_image(instruction, window);
+            display_image(P, instruction);
             waitForTimeOrEsc(start_of_block_time, true, start_tic);
-            display_image(block_instruction, window);
+            display_image(P, block_instruction);
 
             % start the actual run
             if contains(run_type, 'motor')
@@ -116,7 +116,7 @@ function [data_table, midi_data_table, shuffled_conditions] = single_run(window,
             % get the start time of next block, including the "false block" at the end, for the last fixation after the last block.
             instruction_time = instruction_display_times(i_block + 1);
             fixation = imread('fixation_black.JPG');
-            display_image(fixation, window);
+            display_image(P, fixation);
             waitForTimeOrEsc(instruction_time, true, start_tic);
 
         end
@@ -128,7 +128,7 @@ function [data_table, midi_data_table, shuffled_conditions] = single_run(window,
             save(temp_filename, "data_table")
 
             break_img = imread('break.JPG');
-            display_image(break_img, window);
+            display_image(P, break_img);
     catch E
 %         rethrow(E)
         msgText = getReport(E,'basic');

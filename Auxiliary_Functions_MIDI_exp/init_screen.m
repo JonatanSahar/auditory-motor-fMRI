@@ -1,4 +1,4 @@
-function [window, xCenter, yCenter] = init_screen(size)
+function [window, xCenter, yCenter] = init_screen(P, size)
     Screen('Preference', 'SkipSyncTests', 2);
     switch size
       case 'small'
@@ -11,11 +11,11 @@ function [window, xCenter, yCenter] = init_screen(size)
         size_y = 700;
         pos_x = init_pos_x + size_x;
         pos_y = init_pos_y + size_y;
-        [window, rect] = Screen('openwindow',0,[120, 120, 120],...
+        [window, rect] = Screen('openwindow',0,[230, 230, 230],...
                             [init_pos_x, init_pos_y, pos_x, pos_y]);
 
       case 'fullscreen'
-        [window, rect] = Screen('openwindow',2,[120, 120, 120]);
+        [window, rect] = Screen('openwindow',2,[230, 230, 230]);
     end
     % Get the centre coordinate of the window in pixels
     [xCenter, yCenter] = RectCenter(rect);
