@@ -1,6 +1,5 @@
 function key = waitForResponseBox(P, maxTimeToWait, bCountFromTic, startTic)
     key = 'none';
-    fprintf("waiting for next Tr cue from MRI...\n")
     rPressed = 0;
     bPressed = 0;
     pressed = 0;
@@ -8,7 +7,8 @@ function key = waitForResponseBox(P, maxTimeToWait, bCountFromTic, startTic)
 
     if ~exist('bCountFromTic','var') || bCountFromTic ~= true
         startTic = tic;
-
+    end
+    
     while ~timedOut && ~pressed
         % check if a key is pressed
         % only keys specified in activeKeys are considered valid

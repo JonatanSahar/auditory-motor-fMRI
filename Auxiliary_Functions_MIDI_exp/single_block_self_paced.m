@@ -10,22 +10,30 @@ try % a single block
     waitForTimeOrEsc(P.IPI, true, blockP.start_of_block_tic);
     drawFixation(P, P.fixationColorGo);
     while (toc(P.start_of_run_tic) <= blockP.end_of_block_time)
-        P.lastStimTic = tic;
-
         key = waitForResponseBox(P, P.fixationDisplayDuration)
-        outP.log.pressTimes(eventCount) = toc(P.start_of_run_tic);
-        outP.log.cueTimes(eventCount) = toc(P.start_of_run_tic);
-        if isCorrectKey(key, blockP.hand)
+        
+        if isCorrectKey(key, blockP.hand) & (eventCount <= P.num_events_per_block)
+            outP.log.pressTimes(eventCount) = toc(P.start_of_run_tic);
+            outP.log.cueTimes(eventCount) = toc(P.start_of_run_tic);
+            
             playSound(P, blockP.ear, blockP.bMute)
-            % WaitSecs(0.2);
-            % drawFixation(P, P.fixationColorRest);
             outP.log.errors(eventCount) = "NONE";
-        elseif  key ~= 'none'
+            if  eventCount == P.num_events_per_block
+%                 outP.err.MISSED_CUE = outP.err.MISSED_CUE + 1;
+                drawError(P, P.green, P.fixationColorRest); % flash a green background
+            end
+            
+            
+            eventCount = eventCount + 1;
+            
+        elseif  key ~= 'none' & (eventCount <= P.num_events_per_block)
+            outP.log.pressTimes(eventCount) = toc(P.start_of_run_tic);
             outP.err.WRONG_RESPONSE = outP.err.WRONG_RESPONSE + 1;
             outP.log.errors(eventCount) = "WRONG_RESPONSE";
-            drawError(P, P.fixationColorRest); % flash a red background
+            drawError(P, P.red, P.fixationColorRest); % flash a red background
+            eventCount = eventCount + 1;
         end
-        eventCount = eventCount + 1;
+        
     end
     drawFixation(P, P.fixationColorRest);
 catch E

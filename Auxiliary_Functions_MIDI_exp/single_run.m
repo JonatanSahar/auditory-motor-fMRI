@@ -1,9 +1,9 @@
 function [table, shuffled_conditions, outP] = single_run(P, table)
     % init the log arrays for all the blocks in this run
 % TODO: transpose the log matrics
-    outP.log.cueTimes = nan(P.num_blocks,P.num_events_per_block);
-    outP.log.pressTimes = nan(P.num_blocks,P.num_events_per_block);
-    outP.log.errors = strings(P.num_blocks,P.num_events_per_block);
+    outP.log.cueTimes = nan(2 * P.num_events_per_block, P.num_blocks);
+    outP.log.pressTimes = nan(2 * P.num_events_per_block, P.num_blocks);
+    outP.log.errors = strings(2 * P.num_events_per_block, P.num_blocks);
 
     switch P.run_type
       case 'motor_loc'
@@ -82,6 +82,11 @@ function [table, shuffled_conditions, outP] = single_run(P, table)
                 blockP.err = blockOutP.err;
                 table = updateTable(P, blockP, table);
 
+                outP.log.cueTimes(1:size(blockOutP.log.cueTimes,2), blockP.block_num) = blockOutP.log.cueTimes;
+                outP.log.pressTimes(1:size(blockOutP.log.pressTimes,2), blockP.block_num) = blockOutP.log.pressTimes;
+                outP.log.errors(1:size(blockOutP.log.errors,2), blockP.block_num) = blockOutP.log.errors;
+
+
             else % not contains(P.run_type, 'motor')
                  % for the auditory localizer
 
@@ -90,9 +95,6 @@ function [table, shuffled_conditions, outP] = single_run(P, table)
                 table = updateTable(P, blockP, table);
             end
 
-            outP.log.cueTimes(blockP.block_num,:) = blockOutP.log.cueTimes;
-            outP.log.pressTimes(blockP.block_num,:) = blockOutP.log.pressTimes;
-            outP.log.errors(blockP.block_num,:) = blockOutP.log.errors;
 
             % wait for remainder of time in block if needed.
             % TODO this is prob. unneccesary - it's the loop conditon in single_block.

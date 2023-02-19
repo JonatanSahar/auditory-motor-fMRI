@@ -68,7 +68,7 @@ assert(mod(P.num_blocks, 4) == 0);
 
 P.num_events_per_block = 6; % number of button presses in a block
 instruction_display_duration = 1; % in seconds
-block_duration = 10; %9 in seconds
+block_duration = 8; %9 in seconds
 rest_duration = 8; %8 in seconds, between blocks
 rest_duration_short = 3; % in seconds, between blocks
 
@@ -92,7 +92,7 @@ P.sound.right = [zeros(size(P.sound.y'));P.sound.y'];
 P.sound.left = [P.sound.y';zeros(size(P.sound.y'))];
 P.sound.silence = [zeros(size(P.sound.y'));zeros(size(P.sound.y'))];
 
-P.IPI = 1.5;
+P.IPI = (block_duration-0.5)/P.num_events_per_block;
 P.volume = 10;
 
 P.pahandle = PsychPortAudio('Open',[],[],P.latenceyReq, [],P.nrchannels);
