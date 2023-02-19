@@ -16,6 +16,6 @@ end
         PsychPortAudio('FillBuffer',P.pahandle,P.sound.silence);
     end
     PsychPortAudio('Start',P.pahandle); % optionally play a fraction of the sound: , 0.3);
-    WaitSecs(0.4);
+    WaitSecs(P.soundDuration);
     PsychPortAudio('Stop',P.pahandle);
 end

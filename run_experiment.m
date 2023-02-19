@@ -18,7 +18,7 @@
 %% paths
 clc; clear; clear all; sca
 addpath(fullfile(pwd));
-addpath(fullfile(pwd, 'Auxiliary_Functions_MIDI_exp'));
+addpath(fullfile(pwd, 'auxiliary_functions'));
 addpath(fullfile(pwd, 'instruction_images'));
 
 P.output_dir = fullfile(pwd, 'output_data');
@@ -55,9 +55,9 @@ RestrictKeysForKbCheck([esc t r b]);
 %% misc Parameters
 demo_run = 1;
 
-P.bShowDisplay = 1;
+P.bShowDisplay = 0;
 
-P.bShowSmallDisplay = 0;
+P.bShowSmallDisplay = 1;
 
 %% run % block parameters
 
@@ -92,7 +92,8 @@ P.sound.right = [zeros(size(P.sound.y'));P.sound.y'];
 P.sound.left = [P.sound.y';zeros(size(P.sound.y'))];
 P.sound.silence = [zeros(size(P.sound.y'));zeros(size(P.sound.y'))];
 
-P.IPI = block_duration/P.num_events_per_block - 0.4; 
+P.soundDuration = 0.4;
+P.IPI = block_duration/P.num_events_per_block - P.soundDuration;
 P.volume = 10;
 
 P.pahandle = PsychPortAudio('Open',[],[],P.latenceyReq, [],P.nrchannels);

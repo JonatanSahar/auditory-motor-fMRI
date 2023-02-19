@@ -56,7 +56,6 @@ function [table, shuffled_conditions, outP] = single_run(P, table)
             blockP.end_of_block_time = P.block_end_times(block_num);
             [blockP.ear, blockP.hand] = get_condition_for_block(shuffled_conditions, block_num);
 
-            blockP.err.MISSED_CUE =  0;
             blockP.err.WRONG_RESPONSE = 0;
             
             blockP.start_of_block_time = P.block_start_times(block_num)
