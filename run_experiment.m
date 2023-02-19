@@ -55,9 +55,9 @@ RestrictKeysForKbCheck([esc t r b]);
 %% misc Parameters
 demo_run = 1;
 
-P.bShowDisplay = 0;
+P.bShowDisplay = 1;
 
-P.bShowSmallDisplay = 1;
+P.bShowSmallDisplay = 0;
 
 %% run % block parameters
 
@@ -92,7 +92,7 @@ P.sound.right = [zeros(size(P.sound.y'));P.sound.y'];
 P.sound.left = [P.sound.y';zeros(size(P.sound.y'))];
 P.sound.silence = [zeros(size(P.sound.y'));zeros(size(P.sound.y'))];
 
-P.IPI = (block_duration-0.5)/P.num_events_per_block;
+P.IPI = block_duration/P.num_events_per_block - 0.4; 
 P.volume = 10;
 
 P.pahandle = PsychPortAudio('Open',[],[],P.latenceyReq, [],P.nrchannels);

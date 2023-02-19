@@ -1,5 +1,7 @@
 % receive and synthesize note messages from midi in real time
 function outP = single_block(P, blockP)
+    
+    start = tic;
     fprintf("Play!\n");
     err_type = 0;
     outP.err.WRONG_RESPONSE  = 0;

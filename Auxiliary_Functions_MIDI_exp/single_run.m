@@ -46,10 +46,10 @@ function [table, shuffled_conditions, outP] = single_run(P, table)
         instruction_time = P.instruction_display_times(1);
         [blockP.ear, blockP.hand] = get_condition_for_block(shuffled_conditions, 1);
 
-       drawFixation(P, P.fixationColorRest)
+        drawFixation(P, P.fixationColorRest)
         % wait for signal wash-out befor first stimulus
         waitForTimeOrEsc(instruction_time, true, P.start_of_run_tic);
-
+        toc(P.start_of_run_tic)
         for block_num = 1:P.num_blocks
             blockP.block_num = block_num;
             start_of_block_time = P.block_start_times(block_num);
@@ -58,8 +58,9 @@ function [table, shuffled_conditions, outP] = single_run(P, table)
 
             blockP.err.MISSED_CUE =  0;
             blockP.err.WRONG_RESPONSE = 0;
-
-            blockP.start_time = toc(P.start_of_run_tic);
+            
+            blockP.start_of_block_time = P.block_start_times(block_num)
+            blockP.actual_start_of_block = toc(P.start_of_run_tic)
             % get the correct image for the run instruction
             if contains(P.run_type, 'motor')
                 instruction = imread(sprintf('%s.JPG', blockP.hand));
@@ -82,7 +83,7 @@ function [table, shuffled_conditions, outP] = single_run(P, table)
                 blockP.err = blockOutP.err;
                 table = updateTable(P, blockP, table);
 
-                outP.log.cueTimes(1:size(blockOutP.log.cueTimes,2), blockP.block_num) = blockOutP.log.cueTimes;
+%                 outP.log.cueTimes(1:size(blockOutP.log.cueTimes,2), blockP.block_num) = blockOutP.log.cueTimes;
                 outP.log.pressTimes(1:size(blockOutP.log.pressTimes,2), blockP.block_num) = blockOutP.log.pressTimes;
                 outP.log.errors(1:size(blockOutP.log.errors,2), blockP.block_num) = blockOutP.log.errors;
 
