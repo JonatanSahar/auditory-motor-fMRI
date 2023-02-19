@@ -1,3 +1,4 @@
 function correct = isCorrectKey(key, hand)
-    correct = (key == 'b' && hand == 'R') || (key == 'r' && hand == 'L')
+    correct = (isequal(key, 'b') && isequal(hand,'R')) || (isequal(key,'r') && isequal(hand,'L'))
 end
+

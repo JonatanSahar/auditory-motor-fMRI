@@ -9,9 +9,9 @@ function keyCode = waitForTimeOrEsc(timeToWait, bCountFromTic, startTic)
     keyCode = zeros(1, 256);
     timedOut = false;
 
-    if((toc(startTic)) >= timeToWait)
-                fprintf('out of time before timer started!\n');
-    end
+    % if((toc(startTic)) >= timeToWait)
+    %             fprintf('out of time before timer started!\n');
+    % end
     while ~timedOut
         if((toc(startTic)) >= timeToWait), timedOut = true;
             [ keyIsDown, keyTime, keyCode ] = KbCheck;

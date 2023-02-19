@@ -1,5 +1,6 @@
 function [table, shuffled_conditions, outP] = single_run(P, table)
     % init the log arrays for all the blocks in this run
+% TODO: transpose the log matrics
     outP.log.cueTimes = nan(P.num_blocks,P.num_events_per_block);
     outP.log.pressTimes = nan(P.num_blocks,P.num_events_per_block);
     outP.log.errors = strings(P.num_blocks,P.num_events_per_block);
@@ -20,7 +21,7 @@ function [table, shuffled_conditions, outP] = single_run(P, table)
             get_condition_for_block(P.conditions, 1);
         run_instruction = ...
             imread(sprintf('audiomotor_%s_ear.JPG', blockP.ear));
-        blockP.bMute = true;
+        blockP.bMute = false;
 
       case 'audiomotor'
         temp_filename = "temp" + "(" + P.run_type + ")" + ".mat";
@@ -28,7 +29,7 @@ function [table, shuffled_conditions, outP] = single_run(P, table)
             get_condition_for_block(P.conditions, 1);
         run_instruction = ...
             imread(sprintf('audiomotor_%s_ear.JPG', blockP.ear));
-        blockP.bMute = true;
+        blockP.bMute = false;
     end
 
     temp_filename = fullfile(P.output_dir, temp_filename);
@@ -45,7 +46,7 @@ function [table, shuffled_conditions, outP] = single_run(P, table)
         instruction_time = P.instruction_display_times(1);
         [blockP.ear, blockP.hand] = get_condition_for_block(shuffled_conditions, 1);
 
-        drawFixation(P, P.fixationColorRest)
+       drawFixation(P, P.fixationColorRest)
         % wait for signal wash-out befor first stimulus
         waitForTimeOrEsc(instruction_time, true, P.start_of_run_tic);
 
@@ -59,7 +60,6 @@ function [table, shuffled_conditions, outP] = single_run(P, table)
             blockP.err.WRONG_RESPONSE = 0;
 
             blockP.start_time = toc(P.start_of_run_tic);
-            blockP.start_of_block_tic = tic;
             % get the correct image for the run instruction
             if contains(P.run_type, 'motor')
                 instruction = imread(sprintf('%s.JPG', blockP.hand));
@@ -70,12 +70,13 @@ function [table, shuffled_conditions, outP] = single_run(P, table)
             display_image(P, instruction);
             waitForTimeOrEsc(start_of_block_time, true, P.start_of_run_tic);
 
-            drawFixation(P, P.fixationColorGo)
+            blockP.start_of_block_tic = tic;
+            drawFixation(P, P.fixationColorRest)
 
             % start the actual run
             if contains(P.run_type, 'motor')
 
-                blockOutP = single_block(P, blockP);
+                blockOutP = single_block_self_paced(P, blockP);
 
                 blockP.duration = toc(blockP.start_of_block_tic);
                 blockP.err = blockOutP.err;
@@ -83,10 +84,15 @@ function [table, shuffled_conditions, outP] = single_run(P, table)
 
             else % not contains(P.run_type, 'motor')
                  % for the auditory localizer
-                playGeneratedSequence(blockP.ear);
-                blockP.duration = toc(block.start_of_block_tic);
+
+                blockOutP = single_block_auditory(P, blockP);
+                blockP.duration = toc(blockP.start_of_block_tic);
                 table = updateTable(P, blockP, table);
             end
+
+            outP.log.cueTimes(blockP.block_num,:) = blockOutP.log.cueTimes;
+            outP.log.pressTimes(blockP.block_num,:) = blockOutP.log.pressTimes;
+            outP.log.errors(blockP.block_num,:) = blockOutP.log.errors;
 
             % wait for remainder of time in block if needed.
             % TODO this is prob. unneccesary - it's the loop conditon in single_block.
@@ -118,4 +124,3 @@ function [table, shuffled_conditions, outP] = single_run(P, table)
         % ListenChar()
 
 end % function
- 

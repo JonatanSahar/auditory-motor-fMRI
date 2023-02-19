@@ -1,20 +1,21 @@
 function playSound(P, ear, bMute)
     fprintf("ding!\n")
-    pahandle = PsychPortAudio('Open',[],[],P.latenceyReq,[],P.nrchannels);
-
-    if ~exist('bMute','var') || ~bMute
+if ~exist('bMute','var')
+    bMute = false;
+end
+     if ~bMute
         if strcmp(ear, 'R')
-            PsychPortAudio('FillBuffer',pahandle,P.sound.right);
+            PsychPortAudio('FillBuffer',P.pahandle,P.sound.right);
         elseif strcmp(ear, 'L')
-            PsychPortAudio('FillBuffer',pahandle,P.sound.left);
+            PsychPortAudio('FillBuffer',P.pahandle,P.sound.left);
         elseif strcmp(ear, 'both')
-            PsychPortAudio('FillBuffer',pahandle,P.sound.wavedata);
+            PsychPortAudio('FillBuffer',P.pahandle,P.sound.wavedata);
         end
 
     else
-        PsychPortAudio('FillBuffer',pahandle,P.sound.silence);
+        PsychPortAudio('FillBuffer',P.pahandle,P.sound.silence);
     end
-    PsychPortAudio('Start',pahandle);
+    PsychPortAudio('Start',P.pahandle); % optionally play a fraction of the sound: , 0.3);
     WaitSecs(0.4);
-    PsychPortAudio('Close',pahandle);
+    PsychPortAudio('Stop',P.pahandle);
 end

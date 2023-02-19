@@ -74,7 +74,7 @@ P.sound.wavedata=[P.sound.y';P.sound.y'];
 P.sound.right = [zeros(size(P.sound.y'));P.sound.y'];
 P.sound.left = [P.sound.y';zeros(size(P.sound.y'))];
 
-P.interPressInterval = 2
+P.IPI = 2
 P.volume = 10;
 
 %% logging

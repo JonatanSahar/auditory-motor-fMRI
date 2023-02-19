@@ -68,7 +68,7 @@ assert(mod(P.num_blocks, 4) == 0);
 
 P.num_events_per_block = 6; % number of button presses in a block
 instruction_display_duration = 1; % in seconds
-block_duration = 9; %9 in seconds
+block_duration = 10; %9 in seconds
 rest_duration = 8; %8 in seconds, between blocks
 rest_duration_short = 3; % in seconds, between blocks
 
@@ -79,13 +79,12 @@ P.fixationCoords = [[-P.fixCrossDim P.fixCrossDim 0 0]; ...
 P.lineWidthFixation = 8; %line width of fixaton cross in pixels
 P.fixationColorGo = P.green;
 P.fixationColorRest = P.black;
-P.fixationDisplayDuration = 0.8;
+P.fixationDisplayDuration = 1;
 % [top-left-x, top-left-y, bottom-right-x, bottom-right-y].
 P.stimDim=[0 0 185 185];
 P.textSize = 54;
 
 %% sounds
-% TODO: fixme
 [P.sound.y,P.sound.freq]=audioread('./audio_files/middleC.ogg');
 P.sound.y=P.sound.y(1:end);
 P.sound.wavedata=[P.sound.y';P.sound.y'];
@@ -93,15 +92,16 @@ P.sound.right = [zeros(size(P.sound.y'));P.sound.y'];
 P.sound.left = [P.sound.y';zeros(size(P.sound.y'))];
 P.sound.silence = [zeros(size(P.sound.y'));zeros(size(P.sound.y'))];
 
-P.interPressInterval = 2
+P.IPI = 1.5;
 P.volume = 10;
+
+P.pahandle = PsychPortAudio('Open',[],[],P.latenceyReq, [],P.nrchannels);
 
 %% logging
 
 if demo_run % override values for a shorter run
     P.num_runs = 1;
     P.num_blocks = 4;
-    block_duration = 8; %8 in seconds
     rest_duration = 1; %8 in seconds, between blocks
 end
 
@@ -221,7 +221,7 @@ while true
           case 'ml'
             fprintf("Running a motor localizer\n")
 
-            [table, table_filename] = ...
+            [eventTable, table_filename] = ...
                 createTable(P, 'motor_loc', int2str(i_run_mot));
 
             % for knowing later what we're supposed to run
@@ -235,7 +235,7 @@ while true
           case 'al'
             fprintf("Running an auditory localizer\n")
 
-            [table, table_filename] = ...
+            [eventTable, table_filename] = ...
                 createTable(P,'auditory_loc', int2str(i_run_aud));
 
             % for knowing later what we're supposed to run
@@ -247,30 +247,26 @@ while true
             i_run_aud = i_run_aud + 1;
 
           case 'sc'
-            % TODO fixme
             fprintf("Running a short sound check...\n\n")
 
             input('\nboth ears (press enter)\n');
-            % fprintf("both: (in 0.1s)\n")
             WaitSecs(0.1)
-            playGeneratedSequence('both');
+            playSampleSequence(P, 'both');
 
             input('\nR ear (press enter)\n');
-            % fprintf("R: (in 0.1s)\n")
             WaitSecs(0.1)
-            playGeneratedSequence('R');
+            playSampleSequence(P, 'R');
 
             input('\nL ear (press enter)\n');
-            % fprintf("L: (in 0.1s)\n")
             WaitSecs(0.1)
-            playGeneratedSequence('L');
+            playSampleSequence(P, 'L');
 
             running_count = running_count - 1;
             continue
 
           case 'sr'
             fprintf("Running a short run (4 blocks)\n")
-            [table, table_filename] = createTable(P,'audiomotor_short', int2str(i_run));
+            [eventTable, table_filename] = createTable(P,'audiomotor_short', int2str(i_run));
             P.run_num = 1;
             file_num = 1;
             P.run_type = 'audiomotor_short';
@@ -290,7 +286,7 @@ while true
             continue
 
           case 'r'
-            [table, table_filename] = createTable(P, ...
+            [eventTable, table_filename] = createTable(P, ...
                                                   'audiomotor',...
                                                   int2str(i_run));
 
@@ -352,29 +348,33 @@ while true
         end % end switch-case
 
         %% run the chosen condition
-        [table, shuffled_conditions, outP] = ...
-            single_run(P, table);
+        [eventTable, shuffled_conditions, outP] = ...
+            single_run(P, eventTable);
 
-        log.cueTimes = outP.log.cueTimes;
-        log.pressTimes = outP.log.pressTimes;
-        log.errors = outP.log.errors;
-        log.blockConditionsInOrder = shuffled_conditions;
+        T = splitvars(table(arrayfun(@index_to_name, shuffled_conditions)));
+        T.Properties.VariableNames =  {'ear', 'hand'}
+        log = outP.log;
+        log.blockConditionsInOrder = T;
+
         WaitSecs(0.1);
 
-        save(fullfile(P.output_dir, table_filename), "table");
+        save(fullfile(P.output_dir, table_filename), "eventTable");
         save(fullfile(P.output_dir, table_filename + "_log"), "log");
-        writetable(table, fullfile(P.output_dir, table_filename + ".xls"));
+        writetable(eventTable, fullfile(P.output_dir, table_filename + ".xls"));
 
-        clear table
+        clear eventTable
         fprintf("******\n  Done!\n******\n\n")
 
     catch E
-                rethrow(E)
         msgText = getReport(E,'basic');
         fprintf("Caught exception: %s\n", msgText)
+        PsychPortAudio('Close',P.pahandle);
+        rethrow(E)
     end % end try/catch
 end % end while(true)
 
+
+PsychPortAudio('Close',P.pahandle);
 
 % end slide
 WaitSecs(0.1);
