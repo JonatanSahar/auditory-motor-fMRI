@@ -114,7 +114,7 @@ block_and_rest_duration_short = block_duration + rest_duration_short;
 cycle_time_short = block_and_rest_duration_short + instruction_display_duration; %
 
 % start times of blocks, starting with a rest period
-% the instruction_display_time is always the time the fixation break *ends* on
+% the instruction_display_time is always the time the fixation break *ends* on and the L/R instruction is displayed (for fixations that appear after blocks = not the first fixation of the run, this one ends on the first start_of_block time)
 % +1 because we need to wait one last fixation/wash-out after the last block, and the wait is always until the next instruction
 P.instruction_display_times = [rest_duration : ...
                                cycle_time : ...
@@ -134,8 +134,8 @@ P.block_end_times_short = P.block_start_times_short + block_duration;
 P.subject_number = input('Please enter the subject''s number\n');
 
 %% Initialize Data Table parameters
-P.parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'ear',    'hand',   'MISSED_CUE', 'WRONG_RESPONSE'};
-P.var_types =  {'double',  'double',    'double',     'double',       'string',  'string', 'double', 'double'};
+P.parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'end_time', 'static_end_time', 'ear',    'hand',   'TOO_MANY_EVENTS', 'WRONG_RESPONSE', 'INCOMPLETE', 'had_error', 'weight'};
+P.var_types =  {'double',  'double',    'double', 'double', 'double', 'double', 'string',  'string', 'double', 'double', 'double', 'double', 'double'};
 
 % init a dummy midi table
 
@@ -356,6 +356,9 @@ while true
         T.Properties.VariableNames =  {'ear', 'hand'}
         log = outP.log;
         log.blockConditionsInOrder = T;
+        log.blockStartTimes = P.block_start_times;
+        log.instructionDisplayTimes = P.instruction_display_times;
+        log.blockEndTimes = P.block_end_times;
 
         WaitSecs(0.1);
 

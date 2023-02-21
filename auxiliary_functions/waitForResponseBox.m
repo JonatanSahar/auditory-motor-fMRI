@@ -1,33 +1,12 @@
-function key = waitForResponseBox(P, maxTimeToWait, bCountFromTic, startTic)
+function key = waitForResponseBox()
     key = 'none';
-    rPressed = 0;
-    bPressed = 0;
-    pressed = 0;
-    timedOut = false;
-
-    if ~exist('bCountFromTic','var') || bCountFromTic ~= true
-        startTic = tic;
+    [ keyIsDown, keyTime, keyCode ] = KbCheck;
+    if keyCode(KbName('ESCAPE'))
+        throw(MException('MATLAB:badMojo','ESC called'));
     end
-    
-    while ~timedOut && ~pressed
-        % check if a key is pressed
-        % only keys specified in activeKeys are considered valid
-        if((toc(startTic)) >= maxTimeToWait)
-            timedOut = true;
-        else
-            [ keyIsDown, keyTime, keyCode ] = KbCheck;
-            if keyCode(KbName('ESCAPE'))
-                throw(MException('MATLAB:badMojo','ESC called'));
-            end
-            rPressed = keyCode(KbName('r'));
-            bPressed = keyCode(KbName('b'));
-            pressed = rPressed || bPressed;
-        end
-    end
-
-    if rPressed
+    if keyCode(KbName('r'))
         key = 'r';
-    elseif bPressed
+    elseif keyCode(KbName('b'));
         key = 'b';
     end
 end
