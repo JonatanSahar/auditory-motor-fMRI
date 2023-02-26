@@ -1,6 +1,6 @@
 function [table, shuffled_conditions, outP] = single_run(P, table)
     % init the log arrays for all the blocks in this run
-% TODO: transpose the log matrics
+    % TODO: transpose the log matrics
     outP.log.cueTimes = nan(2 * P.num_events_per_block, P.num_blocks);
     outP.log.pressTimes = nan(2 * P.num_events_per_block, P.num_blocks);
     outP.log.errors = strings(2 * P.num_events_per_block, P.num_blocks);
@@ -38,7 +38,12 @@ function [table, shuffled_conditions, outP] = single_run(P, table)
     display_image(P, run_instruction);
     shuffled_conditions = ...
         P.conditions(randperm(length(P.conditions)), :);
-
+    while repeatedPairsExist(shuffled_conditions, 3)
+        fprintf("trying another shuffle...\n")
+        shuffled_conditions = ...
+            P.conditions(randperm(length(P.conditions)), :);
+    end
+    shuffled_conditions
     try
         waitForMRI()
         err_counter = 0;
@@ -59,7 +64,7 @@ function [table, shuffled_conditions, outP] = single_run(P, table)
             blockP.err.WRONG_RESPONSE = 0;
             blockP.err.TOO_MANY_EVENTS = 0;
             blockP.err.INCOMPLETE = 0;
-            
+
             blockP.start_of_block_time = P.block_start_times(block_num)
             % get the correct image for the run instruction
             if contains(P.run_type, 'motor')
@@ -80,17 +85,23 @@ function [table, shuffled_conditions, outP] = single_run(P, table)
 
                 blockOutP = single_block_self_paced(P, blockP);
 
-                blockP.duration = blockOutP.duration; % toc(blockP.start_of_block_tic);
+                blockP.duration = blockOutP.duration
+                blockP.end_of_block_actual = blockOutP.end_of_block_actual;
                 blockP.err = blockOutP.err;
+
                 table = updateTable(P, blockP, table);
-                outP.log.pressTimes(1:size(blockOutP.log.pressTimes,2), blockP.block_num) = blockOutP.log.pressTimes;
-                outP.log.errors(1:size(blockOutP.log.errors,2), blockP.block_num) = blockOutP.log.errors;
+                numPresesses = size(blockOutP.log.pressTimes,2);
+                numErrors = size(blockOutP.log.errors,2);
+                assert(numPresesses == numErrors);
+                outP.log.pressTimes(1:numPresesses, blockP.block_num) = blockOutP.log.pressTimes;
+                outP.log.errors(1:numErrors, blockP.block_num) = blockOutP.log.errors;
 
 
             else % not contains(P.run_type, 'motor')
                  % for the auditory localizer
                 blockOutP = single_block_auditory(P, blockP);
                 blockP.duration = toc(blockP.start_of_block_tic);
+                blockP.end_of_block_actual = toc(P.start_of_run_tic);
                 table = updateTable(P, blockP, table);
             end
 

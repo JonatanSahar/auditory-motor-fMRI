@@ -57,7 +57,7 @@ demo_run = 1;
 
 P.bShowDisplay = 0;
 
-P.bShowSmallDisplay = 1;
+P.bShowSmallDisplay = 0;
 
 %% run % block parameters
 
@@ -134,7 +134,7 @@ P.block_end_times_short = P.block_start_times_short + block_duration;
 P.subject_number = input('Please enter the subject''s number\n');
 
 %% Initialize Data Table parameters
-P.parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'end_time', 'static_end_time', 'ear',    'hand',   'TOO_MANY_EVENTS', 'WRONG_RESPONSE', 'INCOMPLETE', 'had_error', 'weight'};
+P.parameters = {'run_num', 'block_num', 'start_time', 'play_duration', 'last_press_time', 'end_time', 'ear',    'hand',   'TOO_MANY_EVENTS', 'WRONG_RESPONSE', 'INCOMPLETE', 'had_error', 'weight'};
 P.var_types =  {'double',  'double',    'double', 'double', 'double', 'double', 'string',  'string', 'double', 'double', 'double', 'double', 'double'};
 
 % init a dummy midi table

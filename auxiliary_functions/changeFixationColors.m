@@ -1,5 +1,5 @@
 
-function changeFixationColor(P, bgColor, fgcolor)
+function changeFixationColors(P, bgColor, fgcolor)
 
     if P.bShowDisplay
         Screen('FillRect', P.window, bgColor)

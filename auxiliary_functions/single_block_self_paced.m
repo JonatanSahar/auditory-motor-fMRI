@@ -1,7 +1,7 @@
 % receive and synthesize note messages from midi in real time
 function outP = single_block_self_paced(P, blockP)
-    start = tic;
-    fprintf("Play!\n");
+    startOfBlockTic = tic;
+    fprintf("Play! (%s)\n", blockP.hand);
     err_counter = 0;
     outP.duration = 0;
     outP.err.WRONG_RESPONSE  = 0;
@@ -33,12 +33,12 @@ function outP = single_block_self_paced(P, blockP)
                 end
 
                 outP.log.errors(eventCount) = "NONE";
-                outP.duration = toc(blockP.start_of_block_tic);
+                outP.duration = toc(startOfBlockTic);
 
                 eventCount = eventCount + 1;
 
             elseif  key ~= 'none' & (eventCount <= P.num_events_per_block)
-                outP.log.pressTimes(eventCount) = toc(P.start_of_run_tic);
+                outP.log.pressTimes(eventCount) = toc(startOfBlockTic);
                 outP.err.WRONG_RESPONSE = outP.err.WRONG_RESPONSE + 1;
                 outP.log.errors(eventCount) = "WRONG_RESPONSE";
                 drawError(P, P.red, P.fixationColorRest); % flash a red background
@@ -46,19 +46,22 @@ function outP = single_block_self_paced(P, blockP)
 
             elseif isCorrectKey(key, blockP.hand) % more presses than were specified
                 playSound(P, blockP.ear, blockP.bMute)
-                outP.log.pressTimes(eventCount) = toc(P.start_of_run_tic);
+                outP.log.pressTimes(eventCount) = toc(startOfBlockTic);
                 outP.log.errors(eventCount) = "TOO_MANY_EVENTS";
                 outP.err.TOO_MANY_EVENTS = outP.err.TOO_MANY_EVENTS + 1;
             end
         end
+
         if eventCount < P.num_events_per_block
             outP.err.INCOMPLETE = outP.err.INCOMPLETE + 1;
         end
-        blockP.actual_block_end = toc(P.start_of_run_tic);
+
         drawFixation(P, P.fixationColorRest);
+        outP.end_of_block_actual = toc(P.start_of_run_tic);
+
     catch E
         rethrow(E)
     end
-    blockP.actual_block_duration = toc(start)
-end
 
+
+end
