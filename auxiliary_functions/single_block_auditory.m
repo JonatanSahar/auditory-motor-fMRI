@@ -19,7 +19,7 @@ function outP = single_block_auditory(P, blockP)
                 changeFixationColors(P, P.green, P.fixationColorRest);
             end
 
-            playSound(P, blockP.ear, false)
+            playSound(P, blockP.ear, false);
 
             if  eventCount == P.num_events_per_block
                 changeFixationColors(P, P.gray, P.fixationColorRest);
@@ -30,5 +30,4 @@ function outP = single_block_auditory(P, blockP)
             eventCount = eventCount + 1;
         end
     end
-    toc(start)
 end

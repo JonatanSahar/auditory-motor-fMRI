@@ -24,6 +24,7 @@ function [table, shuffled_conditions, outP] = single_run(P, table)
         run_instruction = ...
             imread(sprintf('audiomotor_%s_ear.JPG', blockP.ear));
         blockP.bMute = false;
+        P.num_blocks = P.num_blocks_short;
 
       case 'audiomotor'
         temp_filename = "temp" + "(" + P.run_type + ")" + ".mat";
@@ -43,7 +44,6 @@ function [table, shuffled_conditions, outP] = single_run(P, table)
         shuffled_conditions = ...
             P.conditions(randperm(length(P.conditions)), :);
     end
-    shuffled_conditions
     try
         waitForMRI()
         err_counter = 0;
@@ -93,6 +93,7 @@ function [table, shuffled_conditions, outP] = single_run(P, table)
                 numPresses = size(blockOutP.log.pressTimes,2);
                 numErrors = size(blockOutP.log.errors,2);
                 assert(numPresses == numErrors);
+                outP.log.cueTimes(1:numPresses, blockP.block_num) = blockOutP.log.cueTimes;
                 outP.log.pressTimes(1:numPresses, blockP.block_num) = blockOutP.log.pressTimes;
                 outP.log.errors(1:numErrors, blockP.block_num) = blockOutP.log.errors;
 
