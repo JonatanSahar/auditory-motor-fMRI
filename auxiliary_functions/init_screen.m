@@ -15,7 +15,7 @@ function [window, xCenter, yCenter] = init_screen(P, size)
                             [init_pos_x, init_pos_y, pos_x, pos_y]);
 
       case 'fullscreen'
-        [window, rect] = Screen('openwindow',2,[230, 230, 230]);
+        [window, rect] = Screen('openwindow',1,[230, 230, 230]);
     end
     % Get the centre coordinate of the window in pixels
     [xCenter, yCenter] = RectCenter(rect);

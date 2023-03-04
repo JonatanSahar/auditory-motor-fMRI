@@ -7,9 +7,9 @@ function outP = single_block_self_paced(P, blockP)
     outP.err.WRONG_RESPONSE  = 0;
     outP.err.TOO_MANY_EVENTS  = 0;
     outP.err.INCOMPLETE = 0;
-    outP.log.pressTimes = nan(1,2 * P.num_events_per_block);
-    outP.log.cueTimes = nan(1,2 * P.num_events_per_block);
-    outP.log.errors = strings(1,2 * P.num_events_per_block);
+    outP.log.pressTimes = [];
+    outP.log.cueTimes = [];
+    outP.log.errors = strings(1,8);
 
     try % a single block
         eventCount = 1;

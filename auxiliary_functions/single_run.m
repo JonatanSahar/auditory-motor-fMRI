@@ -85,15 +85,15 @@ function [table, shuffled_conditions, outP] = single_run(P, table)
 
                 blockOutP = single_block_self_paced(P, blockP);
 
-                blockP.duration = blockOutP.duration
+                blockP.duration = blockOutP.duration;
                 blockP.end_of_block_actual = blockOutP.end_of_block_actual;
                 blockP.err = blockOutP.err;
 
                 table = updateTable(P, blockP, table);
-                numPresesses = size(blockOutP.log.pressTimes,2);
+                numPresses = size(blockOutP.log.pressTimes,2);
                 numErrors = size(blockOutP.log.errors,2);
-                assert(numPresesses == numErrors);
-                outP.log.pressTimes(1:numPresesses, blockP.block_num) = blockOutP.log.pressTimes;
+                assert(numPresses == numErrors);
+                outP.log.pressTimes(1:numPresses, blockP.block_num) = blockOutP.log.pressTimes;
                 outP.log.errors(1:numErrors, blockP.block_num) = blockOutP.log.errors;
 
 
@@ -130,11 +130,16 @@ function [table, shuffled_conditions, outP] = single_run(P, table)
         break_img = imread('break.JPG');
         display_image(P, break_img);
     catch E
-        rethrow(E)
+        ListenChar(1) % enable listening for chars and output to console
+        sca
+        if P.debugOn
+            rethrow(E)
+        end
         msgText = getReport(E,'basic');
         fprintf("Caught exception: %s\n", msgText)
         % ListenChar()
     end % try-catch block
         % ListenChar()
 
+        ListenChar(1) % enable listening for chars and output to console
 end % function

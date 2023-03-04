@@ -13,6 +13,17 @@
 %       while hearing in either ear
 
 
+%% Notice
+% the length of each run is 357 TRs (seconds)
+%
+% before the first block there's an 8sec fixation break.
+% each block starts with a slide saying L/R for 1sec, followed by a fixation for 8sec,
+% which turns green after IPI sec, during which the subject presses the button 6 times,
+% and then another fixation for signal wash-out.
+%
+% in auditory blocks it's the same - a slide with R/L, then a fixation which turns green after IPI sec, and then a tones lasting 0.4sec separated by IPI sec between the start of one tone and the start of the next.
+
+
 %% Setting up
 
 %% paths
@@ -22,7 +33,7 @@ addpath(fullfile(pwd, 'auxiliary_functions'));
 addpath(fullfile(pwd, 'instruction_images'));
 
 P.output_dir = fullfile(pwd, 'output_data');
-
+P.debugOn = true;
 %% init psychtoolbox & screens
 Screen('Preference', 'VisualDebugLevel', 3); % skip PTB's intro screen
 Screen('Preference', 'SkipSyncTests', 2);
@@ -53,9 +64,9 @@ esc=KbName('ESCAPE');
 RestrictKeysForKbCheck([esc t r b]);
 
 %% misc Parameters
-demo_run = 1;
+demo_run = 0;
 
-P.bShowDisplay = 0;
+P.bShowDisplay = 1;
 
 P.bShowSmallDisplay = 0;
 
@@ -92,8 +103,16 @@ P.sound.right = [zeros(size(P.sound.y'));P.sound.y'];
 P.sound.left = [P.sound.y';zeros(size(P.sound.y'))];
 P.sound.silence = [zeros(size(P.sound.y'));zeros(size(P.sound.y'))];
 
+[P.testSound.y,P.testSound.freq]=audioread('./audio_files/middleG.mp3');
+P.testSound.y=P.testSound.y(1:end);
+P.testSound.wavedata=[P.testSound.y';P.testSound.y'];
+P.testSound.right = [zeros(size(P.testSound.y'));P.testSound.y'];
+P.testSound.left = [P.sound.y';zeros(size(P.sound.y'))];
+
+
 P.soundDuration = 0.4;
-P.IPI = block_duration/P.num_events_per_block - P.soundDuration;
+P.IPI = block_duration/(P.num_events_per_block+1);
+% P.IPI = block_duration/P.num_events_per_block - P.soundDuration;
 P.volume = 10;
 
 P.pahandle = PsychPortAudio('Open',[],[],P.latenceyReq, [],P.nrchannels);
@@ -114,7 +133,7 @@ block_and_rest_duration_short = block_duration + rest_duration_short;
 cycle_time_short = block_and_rest_duration_short + instruction_display_duration; %
 
 % start times of blocks, starting with a rest period
-% the instruction_display_time is always the time the fixation break *ends* on and the L/R instruction is displayed (for fixations that appear after blocks = not the first fixation of the run, this one ends on the first start_of_block time)
+% the instruction_display_time is always the time the fixation break *ends* on and the L/R instruction is displayed (for fixations that appear after blocks, i.e not the first fixation of the run, this one ends on the first block_start_times time)
 % +1 because we need to wait one last fixation/wash-out after the last block, and the wait is always until the next instruction
 P.instruction_display_times = [rest_duration : ...
                                cycle_time : ...
@@ -279,8 +298,19 @@ while true
           case 'kc'
             fprintf("Running a keyboard check\n")
 
-            fprintf("FIXME")
+            hand = 'R';
+            ear = 'both';
+            timeToRun = 8;
+            bMute = false;
 
+            input('\n(press enter)\n');
+            start = tic;
+            while (toc(start) <= timeToRun)
+                key = waitForResponseBox();
+                if  key ~= 'none'
+                    playSoundTest(P, ear, bMute)
+                end
+            end
             WaitSecs(0.1);
 
             running_count = running_count - 1;
@@ -353,7 +383,7 @@ while true
             single_run(P, eventTable);
 
         T = splitvars(table(arrayfun(@index_to_name, shuffled_conditions)));
-        T.Properties.VariableNames =  {'ear', 'hand'}
+        T.Properties.VariableNames =  {'ear', 'hand'};
         log = outP.log;
         log.blockConditionsInOrder = T;
         log.blockStartTimes = P.block_start_times;
@@ -370,10 +400,14 @@ while true
         fprintf("******\n  Done!\n******\n\n")
 
     catch E
+        ListenChar(1) % enable listening for chars and output to console
         msgText = getReport(E,'basic');
         fprintf("Caught exception: %s\n", msgText)
         PsychPortAudio('Close',P.pahandle);
-        rethrow(E)
+        sca
+        if P.debugOn
+            rethrow(E)
+        end
     end % end try/catch
 end % end while(true)
 
@@ -387,6 +421,7 @@ display_image(P, instruction);
 
 
 % wait for a key press in order to continue
+ListenChar(1) % enable listening for chars and output to console
 RestrictKeysForKbCheck([]);
 fprintf("Press any key to continue\n");
 KbWait;
