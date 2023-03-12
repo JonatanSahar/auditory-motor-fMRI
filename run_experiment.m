@@ -68,7 +68,7 @@ demo_run = 0;
 
 P.bShowDisplay = 1;
 
-P.bShowSmallDisplay = 0;
+P.bShowSmallDisplay = 1;
 
 %% run % block parameters
 
@@ -77,7 +77,7 @@ P.num_blocks_short = 4;
 P.num_blocks = 20; % should be 20, must be multiple of 4.
 assert(mod(P.num_blocks, 4) == 0);
 
-P.num_events_per_block = 6; % number of button presses in a block
+P.num_events_per_block = 7; % number of button presses in a block
 instruction_display_duration = 1; % in seconds
 block_duration = 8; %9 in seconds
 rest_duration = 8; %8 in seconds, between blocks
