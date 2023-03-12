@@ -33,7 +33,7 @@ addpath(fullfile(pwd, 'auxiliary_functions'));
 addpath(fullfile(pwd, 'instruction_images'));
 
 P.output_dir = fullfile(pwd, 'output_data');
-P.debugOn = true;
+P.debugOn = false;
 %% init psychtoolbox & screens
 Screen('Preference', 'VisualDebugLevel', 3); % skip PTB's intro screen
 Screen('Preference', 'SkipSyncTests', 2);
@@ -370,6 +370,13 @@ while true
                     init_screen(P, 'small');
             end
             running_count = running_count - 1;
+            continue
+
+          case 'u' % update values
+
+            str = sprintf("enter new number of button presses, currently: %d\nnew value:", P.num_events_per_block);
+            newNumEvents = str2double(input(str, 's'));
+            P.num_events_per_block = newNumEvents;
             continue
 
           otherwise
