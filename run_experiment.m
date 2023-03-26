@@ -70,6 +70,9 @@ P.bShowDisplay = 1;
 
 P.bShowSmallDisplay = 1;
 
+% set the initial hand for experimental runs
+curr_ear = "R";
+
 %% run % block parameters
 
 P.num_runs = 4; % should be 4
@@ -77,7 +80,7 @@ P.num_blocks_short = 4;
 P.num_blocks = 20; % should be 20, must be multiple of 4.
 assert(mod(P.num_blocks, 4) == 0);
 
-P.num_events_per_block = 7; % number of button presses in a block
+P.num_events_per_block = 8; % number of button presses in a block
 instruction_display_duration = 1; % in seconds
 block_duration = 8; %9 in seconds
 rest_duration = 8; %8 in seconds, between blocks
@@ -322,11 +325,11 @@ while true
                                                   int2str(i_run));
 
             fprintf("Running a full experimental run (20 blocks)\n")
-
-            if mod(i_run, 2);
-                curr_ear = "L";
-            else
+            
+            if curr_ear == "L"
                 curr_ear = "R";
+            elseif  curr_ear == "R"
+                curr_ear = "L";
             end
 
             disp_str = sprintf('\n%s\n',...
@@ -411,9 +414,10 @@ while true
         msgText = getReport(E,'basic');
         fprintf("Caught exception: %s\n", msgText)
         PsychPortAudio('Close',P.pahandle);
-        sca
+        
         if P.debugOn
             rethrow(E)
+            sca
         end
     end % end try/catch
 end % end while(true)
