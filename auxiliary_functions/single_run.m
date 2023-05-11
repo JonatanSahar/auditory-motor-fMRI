@@ -132,8 +132,8 @@ function [table, shuffled_conditions, outP] = single_run(P, table)
         display_image(P, break_img);
     catch E
         ListenChar(1) % enable listening for chars and output to console
-        sca
         if P.debugOn
+            sca
             rethrow(E)
         end
         msgText = getReport(E,'basic');

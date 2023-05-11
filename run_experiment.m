@@ -272,14 +272,14 @@ while true
           case 'sc'
             fprintf("Running a short sound check...\n\n")
 
-            input('\nboth ears (press enter)\n');
-            WaitSecs(0.1)
-            playSampleSequence(P, 'both');
-
             input('\nR ear (press enter)\n');
             WaitSecs(0.1)
             playSampleSequence(P, 'R');
 
+            input('\nboth ears (press enter)\n');
+            WaitSecs(0.1)
+            playSampleSequence(P, 'both');
+            
             input('\nL ear (press enter)\n');
             WaitSecs(0.1)
             playSampleSequence(P, 'L');
