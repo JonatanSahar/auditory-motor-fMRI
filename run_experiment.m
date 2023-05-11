@@ -70,6 +70,9 @@ P.bShowDisplay = 1;
 
 P.bShowSmallDisplay = 1;
 
+% set the initial hand for experimental runs
+curr_ear = "R";
+
 %% run % block parameters
 
 P.num_runs = 4; % should be 4
@@ -267,14 +270,14 @@ while true
           case 'sc'
             fprintf("Running a short sound check...\n\n")
 
-            input('\nboth ears (press enter)\n');
-            WaitSecs(0.1)
-            playSampleSequence(P, 'both');
-
             input('\nR ear (press enter)\n');
             WaitSecs(0.1)
             playSampleSequence(P, 'R');
 
+            input('\nboth ears (press enter)\n');
+            WaitSecs(0.1)
+            playSampleSequence(P, 'both');
+            
             input('\nL ear (press enter)\n');
             WaitSecs(0.1)
             playSampleSequence(P, 'L');
@@ -317,11 +320,11 @@ while true
                                                   int2str(i_run));
 
             fprintf("Running a full experimental run (20 blocks)\n")
-
-            if mod(i_run, 2);
-                curr_ear = "L";
-            else
+            
+            if curr_ear == "L"
                 curr_ear = "R";
+            elseif  curr_ear == "R"
+                curr_ear = "L";
             end
 
             disp_str = sprintf('\n%s\n',...
@@ -403,10 +406,13 @@ while true
         ListenChar(1) % enable listening for chars and output to console
         msgText = getReport(E,'basic');
         fprintf("Caught exception: %s\n", msgText)
+        PsychPortAudio('Close',P.pahandle);
+        
         if P.debugOn
             PsychPortAudio('Close',P.pahandle);
             sca
             rethrow(E)
+            sca
         end
     end % end try/catch
 end % end while(true)
