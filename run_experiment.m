@@ -113,7 +113,7 @@ P.testSound.right = [zeros(size(P.testSound.y'));P.testSound.y'];
 P.testSound.left = [P.sound.y';zeros(size(P.sound.y'))];
 
 
-P.soundDuration = 0.4;
+P.soundDuration = 0.3;
 P.IPI = block_duration/(P.num_events_per_block+1);
 % P.IPI = block_duration/P.num_events_per_block - P.soundDuration;
 P.volume = 10;
@@ -222,11 +222,9 @@ i_run = 1;
 i_run_mot = 1;
 i_run_aud = 1;
 
-running_count = 0;
 
 %% Start the main loop - waiting for user input
 while true
-    running_count = running_count + 1;
     str = sprintf('%s\n',...
                   "Which part would you like to run next?", ...
                   "ml - motor localizer", ...
@@ -245,12 +243,12 @@ while true
             fprintf("Running a motor localizer\n")
 
             [eventTable, table_filename] = ...
-                createTable(P, 'motor_loc', int2str(i_run_mot));
+                createTable(P, 'motorLoc', int2str(i_run_mot));
 
             % for knowing later what we're supposed to run
             P.conditions = motor_only_conditions;
             P.run_num = 1;
-            P.run_type = 'motor_loc';
+            P.run_type = 'motorLoc';
             file_num = i_run_mot;
 
             i_run_mot = i_run_mot + 1;
@@ -259,12 +257,12 @@ while true
             fprintf("Running an auditory localizer\n")
 
             [eventTable, table_filename] = ...
-                createTable(P,'auditory_loc', int2str(i_run_aud));
+                createTable(P,'auditoryLoc', int2str(i_run_aud));
 
             % for knowing later what we're supposed to run
             P.conditions = auditory_only_conditions;
             P.run_num = 1;
-            P.run_type = 'auditory_loc';
+            P.run_type = 'auditoryLoc';
             file_num = i_run_aud;
 
             i_run_aud = i_run_aud + 1;
@@ -284,7 +282,6 @@ while true
             WaitSecs(0.1)
             playSampleSequence(P, 'L');
 
-            running_count = running_count - 1;
             continue
 
           case 'sr'
@@ -294,7 +291,6 @@ while true
             file_num = 1;
             P.run_type = 'audiomotor_short';
             P.conditions = short_conditions;
-            running_count = running_count - 1;
 
             WaitSecs(0.1);
 
@@ -316,7 +312,6 @@ while true
             end
             WaitSecs(0.1);
 
-            running_count = running_count - 1;
             continue
 
           case 'r'
@@ -372,7 +367,6 @@ while true
                 [P.small_window, P.small_xCenter, P.small_yCenter] = ...
                     init_screen(P, 'small');
             end
-            running_count = running_count - 1;
             continue
 
           case 'u' % update values
@@ -383,7 +377,6 @@ while true
             continue
 
           otherwise
-            running_count = running_count - 1;
             continue
 
         end % end switch-case
@@ -416,6 +409,8 @@ while true
         PsychPortAudio('Close',P.pahandle);
         
         if P.debugOn
+            PsychPortAudio('Close',P.pahandle);
+            sca
             rethrow(E)
             sca
         end
