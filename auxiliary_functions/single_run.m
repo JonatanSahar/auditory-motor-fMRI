@@ -8,12 +8,12 @@ function [table, shuffled_conditions, outP] = single_run(P, table)
     outP.duration = 0;
 
     switch P.run_type
-      case 'motor_loc'
+      case 'motorLoc'
         temp_filename = "temp" + "(" + P.run_type + ")" + ".mat";
         run_instruction = imread('motor_localizer.JPG');
         blockP.bMute = true;
 
-      case 'auditory_loc'
+      case 'auditoryLoc'
         temp_filename = "temp" + "(" + P.run_type + ")" + ".mat";
         run_instruction = imread('auditory_localizer.JPG');
 
@@ -132,8 +132,8 @@ function [table, shuffled_conditions, outP] = single_run(P, table)
         display_image(P, break_img);
     catch E
         ListenChar(1) % enable listening for chars and output to console
-        sca
         if P.debugOn
+            sca
             rethrow(E)
         end
         msgText = getReport(E,'basic');
