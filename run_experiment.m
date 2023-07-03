@@ -273,10 +273,6 @@ while true
             input('\nR ear (press enter)\n');
             WaitSecs(0.1)
             playSampleSequence(P, 'R');
-
-            input('\nboth ears (press enter)\n');
-            WaitSecs(0.1)
-            playSampleSequence(P, 'both');
             
             input('\nL ear (press enter)\n');
             WaitSecs(0.1)
