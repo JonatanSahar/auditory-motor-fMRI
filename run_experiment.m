@@ -428,4 +428,3 @@ RestrictKeysForKbCheck([]);
 fprintf("Press any key to continue\n");
 KbWait;
 sca;
-
